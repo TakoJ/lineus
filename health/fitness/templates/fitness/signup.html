@@ -1,0 +1,18 @@
+{% extends "fitness/navbar.html" %}
+
+{% block content %}
+<div class="text-center" style=" margin:0 auto;">
+    <div class="col-xs-6 col-xs-offset-3">
+        <h2>직원회원가입</h2>
+        <form action="" method="POST">
+            {% csrf_token %}
+            {%load crispy_forms_tags %}
+            <table>
+                {{form | crispy}}
+            </table>
+            <button type="submit" class="btn">가입</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "fitness/navbar.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="Register col-xs-8 col-xs-offset-2">
+<h2 class="text-center">회원가입 계약서</h2>
+<form action="" method="POST" class="form-ho">
+    {% csrf_token %}
+<table class='table'>
+    <thead>
+        <h3 class="text-center"><span style="padding:2px; border-bottom:2px solid green;">인적사항</span></h3>
+    </thead>
+    <tbody>
+        <tr>
+            <th>성명*</th>
+            <td><input type="text" name="성명" class="textinput form-control" required></td>
+        </tr>
+        <tr>
+            <th>생년월일*</th>
+            <td><input type="text" name="생년월일" class="dateinput form-control" placeholder="Ex) 1980-06-24" required></td>
+        </tr>
+        <tr>
+            <th>휴대번호*</th>
+            <td><input type="text" name="휴대번호" class="textinput form-control" placeholder="Ex) 010-1234-1234" required></td>
+        </tr>
+        <tr>
+            <th>주소*</th>
+            <td><input type="text" name="주소" class="textinput form-control" required></td>
+        </tr>
+        <tr>
+            <th>성별*</th>
+            <td><select name="성별" class="select form-control" required>
+                <option value="">-----</option>
+                <option value='남자'>남자</option>
+                <option value='여자'>여자</option>
+                </select></td>
+        </tr>
+    <th colspan="2"><h3 class="text-center"><span style="padding:2px; border-bottom:2px solid green;">회원권 세부사항</span></h3>
+    </th>
+
+    <tr>
+        <th>종류선택*</th>
+        <td>
+            <select name="종류선택" class="select form-control" id="id_선택" required>
+            <option value="Fitness">피트니스</option>
+            <option value="Pilates">필라테스</option>
+            <option value="Both">피트니스+필라테스</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th>등급*</th>
+        <td>
+            <select name="등급" class="select form-control" id="id_등급" required>
+            <option value="B">Bronze</option>
+            <option value="S">Silver</option>
+            <option value="G">Gold</option>
+            <option value="VIP">VIP</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th>피트니스기간</th>
+        <td>
+            <select name="피트니스기간" class="select form-control" id="id_피트니스기간">
+            <option value="">---------</option>
+            <option value="1개월">1개월</option>
+            <option value="3개월">3개월</option>
+            <option value="6개월">6개월</option>
+            <option value="12개월">12개월</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th>필라테스기간</th>
+        <td>
+            <select name="필라테스기간" class="select form-control" id="id_필라테스기간">
+            <option value="">---------</option>
+            <option value="주 2회 4주">주 2회 4주</option>
+            <option value="주 3회 4주">주 3회 4주</option>
+            <option value="주 2회 12주">주 2회 12주</option>
+            <option value="주 3회 12주">주 3회 12주</option>
+            <option value="주 2회 24주">주 2회 24주</option>
+            <option value="주 3회 24주">주 3회 24주</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th>추가사항(락카)</th>
+        <td>
+            <select name="추가사항" class="select my-control" id="id_추가사항">
+            <option value="">---------</option>
+            <option value="H">H</option>
+            <option value="G">G</option>
+            </select>
+            <strong>락카사용개월수</strong>
+            <input type="text" name="락카개월수" class="numberinput my-control" placeholder='ex)1 / 락카를 쓰실분만 입력해주세요'>
+        </td>
+
+    </tr>
+    <tr>
+        <th>병력및 주의사항</th>
+        <td><input type="text" name="병력및주의사항" class="textinput form-control"></td>
+    </tr>
+    <tr>
+        <th>운동시간대</th>
+        <td><input type="text" name="운동시간대" class="textinput form-control"></td>
+    </tr>
+    <tr>
+        <th>결제금액*</th>
+        <td><input type="text" name="결제금액" class="numberinput form-control" id="결제금액" required></td>
+    </tr>
+    <tr>
+        <th>결제방식</th>
+        <td>
+            <select name="결제방식" class="select form-control" id="id_결제방식">
+            <option value="카드">카드</option>
+            <option value="현금">현금</option>
+            </select>
+        </td>
+    </tr>
+</tbody>
+</table>
+
+<div style="overflow: auto; height:250px; padding-left:25px;border:1px solid black;">
+<table class="table">
+    <thead>
+        <h3 class="text-center"><span style="padding:2px; border-bottom:2px solid green; border-radius: 2px;">회원약관</span></h3>
+    </thead>
+    <tbody>
+        <p>1.어쩌구</p>
+        <p>2.저쩌구</p>
+        <p>2.저쩌구</p>
+        <p>2.저쩌구</p>
+        <p>2.저쩌구</p>
+        <p>2.저쩌구</p>
+        <h3 style="float:right; margin:20px;"><input type="checkbox" id="agree" value="agree" style="width:20px;height:20px" required> 동의</h3>
+    </tbody>
+
+</table>
+</div>
+    <button type="submit" class="btn btn-success" style="float:right;margin:10px;" >회원가입</button>
+</form>
+</div>
+{% endblock %}

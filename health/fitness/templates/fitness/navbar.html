@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head>
+<!-- 합쳐지고 최소화된 최신 CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+<!-- 부가적인 테마 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+<!-- 합쳐지고 최소화된 최신 자바스크립트 -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+<!-- JS-->
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+    <title>건강과 땀</title>
+</head>
+<body>
+<!-- NAVIGATION BAR -->
+<header>
+<nav class="navbar st-navbar navbar-default">
+    <div class="container">
+    <h1 style="float:left"><a href="{% url 'home' %}">건강과 땀</a></h1>
+    <ul class="nav nav-tabs navbar-right">
+
+        {% if user.is_authenticated %}
+        <li><a href="{% url 'authentication:logout' %}?next={% url 'home' %}">로그아웃</a></li>
+        <li><a href="{% url 'register' %}">회원가입 폼</a></li>
+        <li><a href="{% url 'mypage' %}">나의 페이지</a></li>
+        {% else %}
+        <li><a href="{% url 'authentication:login' %}">로그인</a></li>
+        <li><a href="{% url 'authentication:signup' %}">회원가입</a></li>
+        {% endif %}
+
+    </ul>
+    </div>
+</nav> <!-- /Navigation bar -->
+</header>
+
+{% block content%}
+{% endblock %}
+
+
+<!-- FOOTER -->
+<!-- <footer id="footer">
+    <div class="copyright">
+        <p>&copy; 2017 건강과 땀</p>
+    </div>
+</footer> -->
+<!-- /FOOTER -->
+</body>
+</html>
