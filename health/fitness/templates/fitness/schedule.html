@@ -1,0 +1,26 @@
+{% extends "fitness/navbar.html" %}
+{% block content %}
+<h2 class="text-center"><span style="padding:2px; border-bottom:2px solid green;">{{user}}의 스케줄 관리</span></h2>
+<hr/>
+
+<div class="text-center col-xs-4 col-xs-offset-4" style="border:1px solid black;">
+    <h4>나의 회원</h4>
+    {{PT_members.count}}명
+    <div class="my_PTmember"  style="text-align: center;">
+        {% for PT_member in PT_members %}
+            <div style="display:inline-block; width:60%; float:left;">
+                {{PT_member.성명}}
+                <p>0/{{PT_member.등록횟수}}</p>
+            </div>
+            <div style="display:inline-block; width:20%;float:left;">
+                <form method="GET" action="">
+                <a class="btn btn-default" href="{% url "PT_member_delete" PT_member.id %}">삭제</a>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+    <hr/>
+  <p><a href="{% url 'PT_register' %}" class="btn btn-warning">추가</a></p>
+</div>
+
+{% endblock %}

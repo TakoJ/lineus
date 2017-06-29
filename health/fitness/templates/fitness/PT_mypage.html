@@ -1,0 +1,24 @@
+{% extends "fitness/navbar.html" %}
+{% block content %}
+<h2 class="text-center"><span style="padding:2px; border-bottom:2px solid green;">{{user}}의 My page</span></h2>
+<hr/>
+<div class="col-xs-6 col-xs-offset-3">
+<div class="btn btn-default">전체</div>
+{{PT_members.count}}명
+ <hr>
+
+<div class="btn btn-default">오늘</div>
+{{today_members.count}}명
+<span>{{today_members_pay}}원</span>
+<hr>
+
+<div class="btn btn-default">이번주</div>
+{{thisweek_members.count}}명
+<span>{{thisweek_members_pay}}원</span>
+<hr>
+
+<div class="btn btn-default">이번달</div>
+<span>{{thismonth_members.count}}명</span>
+<span>{{thismonth_members_pay}}원</span>
+</div>
+{% endblock %}

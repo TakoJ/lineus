@@ -1,0 +1,32 @@
+{% extends "fitness/navbar.html" %}
+{% block content %}
+<h2 class="text-center"><span style="padding:2px; border-bottom:2px solid green;">PT 등록</span></h2>
+
+<div id="search">
+<form id="search" method="GET" action="{% url 'search' %}">
+<input type="text" class="form-control search_web" placeholder="이름으로 검색해보세요." name='q' value="{{ q }}">
+<button type="submit" class="btn btn-info" value="검색">검색</button>
+</form>
+</div>
+
+<table class="table table-striped col-sm-8 col-sm-offset-2" style="width:60%">
+    <thead>
+        <th>성명</th>
+        <th>성별</th>
+        <th>생년월일</th>
+        <th>PT 등록횟수</th>
+    </thead>
+    <tbody>
+    {% for member in member_list %}
+    <tr>
+        <td>{{ member.성명 }}</td>
+        <td>{{ member.성별 }}</td>
+        <td>{{ member.생년월일 }}</td>
+        <td>{{ member.등록횟수 }}</td>
+        <td><a class="btn btn-default" href="{% url "PT_register_create" member.id %}">등록</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

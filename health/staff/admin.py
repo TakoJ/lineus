@@ -10,6 +10,5 @@ from django.contrib import admin
 
 # user = User.objects.create_user(Profile.name, Profile.email, Profile.password)
 
-admin.site.register(Staff)
 admin.site.register(Member)
 

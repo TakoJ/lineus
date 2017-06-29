@@ -5,51 +5,44 @@ from django.utils import timezone
 from django.utils.timezone import now
 
 
-class Staff(models.Model):
-    name = models.CharField(max_length=24)
-    job = models.CharField(max_length=24)
-
-    def __str__(self):
-        return str(self.name)
-
 class Member(models.Model):
-    SEX_CHOICES = (
-        ('M','남자'),
-        ('F','여자'),
-    )
-    LOCKER_CHOICES = (
-        ('H','H'),
-        ('G','G'),
-    )
-    TYPE_CHOICES = (
-        ('Fitness','피트니스'),
-        ('Pilates','필라테스'),
-        ('Both','피트니스+필라테스'),
-    )
-    RATING_CHOICES = (
-        ('B','Bronze'),
-        ('S','Silver'),
-        ('G','Gold'),
-        ('VIP','VIP'),
-    )
-    FITNESS_CHOICES = (
-        ('1개월','1개월'),
-        ('3개월','3개월'),
-        ('6개월','6개월'),
-        ('12개월','12개월'),
-    )
-    PILATES_CHOICES = (
-        ('주 2회 4주','주 2회 4주'),
-        ('주 3회 4주','주 3회 4주'),
-        ('주 2회 12주','주 2회 12주'),
-        ('주 3회 12주','주 3회 12주'),
-        ('주 2회 24주','주 2회 24주'),
-        ('주 3회 24주','주 3회 24주'),
-    )
-    PAYMENT_CHOICES = (
-        ('현금','현금'),
-        ('카드','카드'),
-    )
+    # SEX_CHOICES = (
+    #     ('M','남자'),
+    #     ('F','여자'),
+    # )
+    # LOCKER_CHOICES = (
+    #     ('H','H'),
+    #     ('G','G'),
+    # )
+    # TYPE_CHOICES = (
+    #     ('Fitness','피트니스'),
+    #     ('Pilates','필라테스'),
+    #     ('Both','피트니스+필라테스'),
+    # )
+    # RATING_CHOICES = (
+    #     ('B','Bronze'),
+    #     ('S','Silver'),
+    #     ('G','Gold'),
+    #     ('VIP','VIP'),
+    # )
+    # FITNESS_CHOICES = (
+    #     ('1개월','1개월'),
+    #     ('3개월','3개월'),
+    #     ('6개월','6개월'),
+    #     ('12개월','12개월'),
+    # )
+    # PILATES_CHOICES = (
+    #     ('주 2회 4주','주 2회 4주'),
+    #     ('주 3회 4주','주 3회 4주'),
+    #     ('주 2회 12주','주 2회 12주'),
+    #     ('주 3회 12주','주 3회 12주'),
+    #     ('주 2회 24주','주 2회 24주'),
+    #     ('주 3회 24주','주 3회 24주'),
+    # )
+    # PAYMENT_CHOICES = (
+    #     ('현금','현금'),
+    #     ('카드','카드'),
+    # )
     #인적사항
     성명 = models.CharField(max_length=24)
     생년월일 = models.DateField(null=True,help_text='Ex) 1980-06-30')
@@ -72,6 +65,18 @@ class Member(models.Model):
     운동시간대 = models.CharField(max_length=12, blank=True)
     결제금액 = models.DecimalField(max_digits=10,decimal_places=0, default=0)
     결제방식 = models.CharField(max_length=12,default='카드')
+
+    #PT
+    SESSION_CHOICES = (
+        ('10세션/60일','10세션/60일'),
+        ('20세션/90일','20세션/90일'),
+    )
+    Trainer = models.ForeignKey(User, null=True, blank=True, related_name='PT_members', on_delete=models.SET_NULL)
+    등록횟수 = models.IntegerField(blank=True, null=True)
+    등록세션 = models.CharField(max_length=24, blank=True)
+    PT결제금액 = models.DecimalField(max_digits=10, decimal_places=0,blank=True, null=True)
+    PT결제방식 = models.CharField(max_length=12,blank=True)
+
 
 
     def __str__(self):

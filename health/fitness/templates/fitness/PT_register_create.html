@@ -1,0 +1,61 @@
+{% extends "fitness/navbar.html" %}
+{% block content %}
+<div class="Register col-xs-8 col-xs-offset-2">
+<h3 class="text-center">개인 트레이닝 계약서</h3>
+<form action="" method="POST">
+{% csrf_token %}
+<table class='table'>
+<tbody>
+    <tr>
+        <td>성명</td>
+        <td>{{member.성명}}</td>
+    </tr>
+    <tr>
+        <td>생년월일</td>
+        <td>{{member.생년월일}}</td>
+    </tr>
+    <tr>
+        <td>등록세션</td>
+        <td>
+            <select name="등록세션" class="select form-control" id="id_등록세션" required>
+            <option value="10">10세션</option>
+            <option value="20">20세션</option>
+            <option value="30">30세션</option>
+            <option value="40">40세션</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>PT결제금액</td>
+        <td><input type="text" name="PT결제금액" class="numberinput form-control" id="PT결제금액" required></td>
+    </tr>
+    <tr>
+        <td>PT결제방식</td>
+        <td> <select name="PT결제방식" class="select form-control" id="id_PT결제방식">
+            <option value="카드">카드</option>
+            <option value="현금">현금</option>
+            </select></td>
+    </tr>
+</tbody>
+</table>
+<div class="member_rule">
+<table class="table">
+    <thead>
+        <h3 class="text-center"><span style="padding:2px; border-bottom:2px solid green; border-radius: 2px;">회원약관</span></h3>
+    </thead>
+    <tbody>
+        <p>1.어쩌구</p>
+        <p>2.저쩌구</p>
+        <p>2.저쩌구</p>
+        <p>2.저쩌구</p>
+        <p>2.저쩌구</p>
+        <p>2.저쩌구</p>
+        <h3 style="float:right; margin:20px;"><input type="checkbox" id="agree" value="agree" style="width:20px;height:20px" required> 동의</h3>
+    </tbody>
+
+</table>
+</div>
+    <button type="submit" class="btn btn-success" style="float:right;margin:10px;" >PT등록</button>
+</form>
+</div>
+{% endblock %}
