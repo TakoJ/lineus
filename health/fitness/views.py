@@ -38,18 +38,18 @@ def mypage(request):
     members = request.user.members.all()
     date = datetime.date.today() #오늘 받기
     #####오늘#####
-    today_members = members.filter(등록일=date) #오늘 등록한 회원
-    today_members_pay = today_members.aggregate(Sum('결제금액')).get('결제금액__sum',0.00)
+    today_members = members.filter(start_date=date) #오늘 등록한 회원
+    today_members_pay = today_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     #####이번주####
     start_week = date- datetime.timedelta(date.weekday()) #이번주(월요일시작)
     end_week = start_week + datetime.timedelta(6) #월요일 + 6 (일요일)
     this_month = datetime.timedelta(date.month)
-    thisweek_members = members.filter(등록일__range=[start_week, end_week])
-    thisweek_members_pay = thisweek_members.aggregate(Sum('결제금액')).get('결제금액__sum',0.00)
+    thisweek_members = members.filter(start_date__range=[start_week, end_week])
+    thisweek_members_pay = thisweek_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     ####이번달####
     this_month_start = datetime.datetime(date.year, date.month, 1)
-    thismonth_members = members.filter(등록일__range=[this_month_start, date])
-    thismonth_members_pay = thismonth_members.aggregate(Sum('결제금액')).get('결제금액__sum',0.00)
+    thismonth_members = members.filter(start_date__range=[this_month_start, date])
+    thismonth_members_pay = thismonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     context={
         'members' : members,
         'today_members' : today_members,
@@ -65,18 +65,18 @@ def PT_mypage(request):
     PT_members = request.user.PT_members.all()
     date = datetime.date.today() #오늘 받기
     #####오늘#####
-    today_members = PT_members.filter(등록일=date) #오늘 등록한 회원
-    today_members_pay = today_members.aggregate(Sum('결제금액')).get('결제금액__sum',0.00)
+    today_members = PT_members.filter(start_date=date) #오늘 등록한 회원
+    today_members_pay = today_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     #####이번주####
     start_week = date- datetime.timedelta(date.weekday()) #이번주(월요일시작)
     end_week = start_week + datetime.timedelta(6) #월요일 + 6 (일요일)
     this_month = datetime.timedelta(date.month)
-    thisweek_members = PT_members.filter(등록일__range=[start_week, end_week])
-    thisweek_members_pay = thisweek_members.aggregate(Sum('결제금액')).get('결제금액__sum',0.00)
+    thisweek_members = PT_members.filter(start_date__range=[start_week, end_week])
+    thisweek_members_pay = thisweek_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     ####이번달####
     this_month_start = datetime.datetime(date.year, date.month, 1)
-    thismonth_members = PT_members.filter(등록일__range=[this_month_start, date])
-    thismonth_members_pay = thismonth_members.aggregate(Sum('결제금액')).get('결제금액__sum',0.00)
+    thismonth_members = PT_members.filter(start_date__range=[this_month_start, date])
+    thismonth_members_pay = thismonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     context={
         'PT_members' : PT_members,
         'today_members' : today_members,
@@ -135,7 +135,7 @@ def search(request):
 
     # condition=(Q(성명__icontains=keyword))
 
-    search_member = Member.objects.filter(성명__icontains=keyword)#검색 조건 이름
+    search_member = Member.objects.filter(name__icontains=keyword)#검색 조건 이름
 
     context= {
         'search_member' : search_member,

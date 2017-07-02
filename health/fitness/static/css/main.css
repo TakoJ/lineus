@@ -4,10 +4,10 @@ a, a:hover, a:active, a:focus, button:focus {
         text-decoration: none;
     }
 
-.navbar{
-    background-color: pink;
-    border-bottom: 1px solid #f0f0f0;
-}
+    .navbar{
+        background-color: pink;
+        border-bottom: 1px solid #f0f0f0;
+    }
     .st-navbar{
         background-color: #fff;
         border-bottom: 1px solid #f0f0f0;
@@ -59,8 +59,39 @@ a, a:hover, a:active, a:focus, button:focus {
 }
 
 #search button.btn.btn-info {
-    right:-10px;
+    display: inline;
     background-color: blue;
-    border-radius: 0 5px 5px 0;
-    height:100%;
+    /*border-radius: 0 5px 5px 0;*/
 }
+
+.schedule-table{
+    width:100%;
+    border-collapse: collapse;
+}
+
+.schedule-table tr{
+    height: 50px;
+}
+.schedule-table tbody tr td:first-child
+.schedule-table tbody tr th:first-child,{
+    width: 10px;
+}
+
+#home{
+    background-image: url(../img/home.jpg);
+    height:1000px;
+    width: auto;
+    background-size:cover;
+    margin-top:-15px;
+}
+.home,
+.home_name{
+    color:black;
+    text-shadow: 2px 2px 2px gray;
+    padding-left: 660px;
+}
+
+.home{
+    padding-top:100px;
+}
+

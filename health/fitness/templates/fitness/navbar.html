@@ -23,7 +23,7 @@
 <header>
 <nav class="navbar st-navbar navbar-default">
     <div class="container">
-    <h1 style="float:left"><a href="{% url 'home' %}">건강과 땀</a></h1>
+    <a class="navbar-brand" href="{% url 'home' %}" style="float: left; margin-top: -10px; margin-left: -150px;"><img src="/static/img/logo.png" alt="Logo" style="float: left;"></a>
     <ul class="nav nav-tabs navbar-right">
 
         {% if user.is_authenticated %}

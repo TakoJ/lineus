@@ -13,23 +13,23 @@
     <tbody>
         <tr>
             <th>성명*</th>
-            <td><input type="text" name="성명" class="textinput form-control" required></td>
+            <td><input type="text" name="name" class="textinput form-control" required></td>
         </tr>
         <tr>
             <th>생년월일*</th>
-            <td><input type="text" name="생년월일" class="dateinput form-control" placeholder="Ex) 1980-06-24" required></td>
+            <td><input type="text" name="birth" class="dateinput form-control" placeholder="Ex) 1980-06-24" required></td>
         </tr>
         <tr>
             <th>휴대번호*</th>
-            <td><input type="text" name="휴대번호" class="textinput form-control" placeholder="Ex) 010-1234-1234" required></td>
+            <td><input type="text" name="phone_num" class="textinput form-control" placeholder="Ex) 010-1234-1234" required></td>
         </tr>
         <tr>
             <th>주소*</th>
-            <td><input type="text" name="주소" class="textinput form-control" required></td>
+            <td><input type="text" name="address" class="textinput form-control" required></td>
         </tr>
         <tr>
             <th>성별*</th>
-            <td><select name="성별" class="select form-control" required>
+            <td><select name="sex" class="select form-control" required>
                 <option value="">-----</option>
                 <option value='남자'>남자</option>
                 <option value='여자'>여자</option>
@@ -41,7 +41,7 @@
     <tr>
         <th>종류선택*</th>
         <td>
-            <select name="종류선택" class="select form-control" id="id_선택" required>
+            <select name="type_choice" class="select form-control" id="type_choice" required>
             <option value="Fitness">피트니스</option>
             <option value="Pilates">필라테스</option>
             <option value="Both">피트니스+필라테스</option>
@@ -51,7 +51,8 @@
     <tr>
         <th>등급*</th>
         <td>
-            <select name="등급" class="select form-control" id="id_등급" required>
+            <select name="rating" class="select form-control" id="rating" required>
+            <option value="">-------</option>
             <option value="B">Bronze</option>
             <option value="S">Silver</option>
             <option value="G">Gold</option>
@@ -59,61 +60,89 @@
             </select>
         </td>
     </tr>
-    <tr>
+    <tr id="tr_period_fitness" style="display: ">
         <th>피트니스기간</th>
         <td>
-            <select name="피트니스기간" class="select form-control" id="id_피트니스기간">
+            <select name="period_fitness" class="select form-control" id="period_fitness">
             <option value="">---------</option>
-            <option value="1개월">1개월</option>
-            <option value="3개월">3개월</option>
-            <option value="6개월">6개월</option>
-            <option value="12개월">12개월</option>
+            <option value="m1">1개월</option>
+            <option value="m3">3개월</option>
+            <option value="m6">6개월</option>
+            <option value="m12">12개월</option>
             </select>
         </td>
     </tr>
-    <tr>
+    <tr id="tr_period_pilates" style="display: none">
         <th>필라테스기간</th>
         <td>
-            <select name="필라테스기간" class="select form-control" id="id_필라테스기간">
+            <select name="period_pilates" class="select form-control" id="period_pilates">
             <option value="">---------</option>
-            <option value="주 2회 4주">주 2회 4주</option>
-            <option value="주 3회 4주">주 3회 4주</option>
-            <option value="주 2회 12주">주 2회 12주</option>
-            <option value="주 3회 12주">주 3회 12주</option>
-            <option value="주 2회 24주">주 2회 24주</option>
-            <option value="주 3회 24주">주 3회 24주</option>
+            <option value="se2m1">주 2회 1개월</option>
+            <option value="se3m1">주 3회 1개월</option>
+            <option value="se2m3">주 2회 3개월</option>
+            <option value="se3m3">주 3회 3개월</option>
+            <option value="se2m6">주 2회 6개월</option>
+            <option value="se3m6">주 3회 6개월</option>
+            </select>
+        </td>
+    </tr>
+    <tr id="tr_period_both" style="display:none ">
+        <th>피트니스+필라테스기간</th>
+        <td>
+            <select name="period_both" class="select form-control" id="period_both">
+            <option value="">---------</option>
+            <option value="se2m1">1개월/필라테스주2회</option>
+            <option value="se3m1">1개월/필라테스주3회</option>
+            <option value="se2m3">3개월/필라테스주2회</option>
+            <option value="se3m3">3개월/필라테스주3회</option>
+            <option value="se2m6">6개월/필라테스주2회</option>
+            <option value="se3m6">6개월/필라테스주3회</option>
             </select>
         </td>
     </tr>
     <tr>
         <th>추가사항(락카)</th>
         <td>
-            <select name="추가사항" class="select my-control" id="id_추가사항">
+            <select name="locker" class="select my-control" id="locker">
             <option value="">---------</option>
             <option value="H">H</option>
             <option value="G">G</option>
             </select>
             <strong>락카사용개월수</strong>
-            <input type="text" name="락카개월수" class="numberinput my-control" placeholder='ex)1 / 락카를 쓰실분만 입력해주세요'>
+            <input type="text" name="period_locker" class="numberinput my-control" placeholder='ex)1 / 락카를 쓰실분만 입력해주세요'>
         </td>
 
     </tr>
     <tr>
         <th>병력및 주의사항</th>
-        <td><input type="text" name="병력및주의사항" class="textinput form-control"></td>
+        <td><input type="text" name="cautions" class="textinput form-control"></td>
     </tr>
     <tr>
         <th>운동시간대</th>
-        <td><input type="text" name="운동시간대" class="textinput form-control"></td>
+        <td><input type="text" name="exercise_time" class="textinput form-control"></td>
+    </tr>
+    <tr>
+        <th>방문경로</th>
+        <td>
+            <input type="text" name="visit_path" list="visit_path" class="select form-control">
+            <datalist id="visit_path">
+              <option value="hompage">홈페이지</option>
+                <option value="blog">블로그</option>
+                <option value="sns">SNS</option>
+                <option value="pamphlet">전단지</option>
+                <option value="friend">지인소개</option>
+                <option value="etc">기타(직접작성)</option>
+            </datalist>
+        </td>
     </tr>
     <tr>
         <th>결제금액*</th>
-        <td><input type="text" name="결제금액" class="numberinput form-control" id="결제금액" required></td>
+        <td><input type="text" name="payment_amount" class="numberinput form-control" id="payment_amount" required></td>
     </tr>
     <tr>
         <th>결제방식*</th>
         <td>
-            <select name="결제방식" class="select form-control" id="id_결제방식">
+            <select name="payment_method" class="select form-control" id="payment_method">
             <option value="카드">카드</option>
             <option value="현금">현금</option>
             </select>
@@ -128,12 +157,40 @@
         <h3 class="text-center"><span style="padding:2px; border-bottom:2px solid green; border-radius: 2px;">회원약관</span></h3>
     </thead>
     <tbody>
-        <p>1.어쩌구</p>
-        <p>2.저쩌구</p>
-        <p>2.저쩌구</p>
-        <p>2.저쩌구</p>
-        <p>2.저쩌구</p>
-        <p>2.저쩌구</p>
+        <p>1. 귀중품 및 소지품(운동화. 샤워용품)등을 맡기지 않고 분실할 경우 본인이 책임집니다.</p>
+        <p>2. 본 센터의 휴회 규정은 다음과 같습니다.</p>
+           <p>- 휴회는 회원이 신청서를 작성한 날부터 효력이 발생하며, 이미 지난 기간은 적용이 불가합니다.</p>
+           <p>- 1개월권 휴회 불가</p>
+           <p>- 3개월권 최소1주 ~ 최대 1개월 휴회 (단, 1회에 한함)</p>
+           <p>- 6개월권 최소1주 ~ 최대 1개월 휴회 (단, 2회에 한함)</p>
+           <p>- 12개월권 최소1주 ~ 최대 1개월 휴회 (단, 3회에 한함)</p>
+        <p>3. 자물쇠 및 회원카드 분실 시, 소정의 재발급 비용을 (3000원) 받습니다.</p>
+        <p>4. 부득이한 사유로 타인에게 양도시, 1회에 한하며 양도비용은 1개월 기준 만원입니다. 양도받으신 회원권은 환불되지 않습니다.</p>
+        <p>5. 본 센터의 환불 규정은 다음과 같습니다.</p>
+         <p>- 환불 요청 시 가입 당시 할인된 금액이 아닌 정상가로 정산하여 공제되며, 계약 시 지급한 총 합계 금액의 위약금 10%와</p>
+           <p>운동 시작일로부터 해약 월수가 계산 된 금액의 합을 공제하여 전액 환불됩니다.</p>
+         <p>- 가입 시 서비스로 제공된 기간은 포함되지 않으며, 개인사정에 의해 연기된 기간은 포함되어 환불됩니다.</p>
+         <p>- 환불 신청서 접수 후 14일 이내 환불 처리 됩니다.</p>
+        <p>6. 개인라카 물품은 기간 만료시 회수하셔야하며 기간 만료 후 일주일 경과 후에도 방치 시에는 본관에서 모두 회수하여</p>
+           <p>“아름다운 가게에” 기증 됩니다(본관에서 별도의 연락조치를 하지 않습니다)</p>
+        <p>7. 개인소지품(운동화,샤워 도구등)은 필히 개인사물함에 보관 하십시오.</p>
+           <p>귀중품 기타 고가의 소지품등은 안내 데스크에 보관 의뢰하셔야 합니다.</p>
+           <p>본관에서는 고객의 소지품등이 멸실/훼손되지 않도록 안내 데스크 보관, CCTV 운용 등 최선의 노력을 기울이고 있습니다.</p>
+           <p>고객님 또한 개인부주의 등으로 소지품이 멸실, 훼손 등이 되지 않도록 최선의 의무를 다 하셔야 합니다.</p>
+           <p>고의적 악의적으로 사물함 외의 장소에 소지품등을 보관 또는 방치 후 배상 등의 책임을 요구하시는 경우 본관에서는</p>
+           <p>민/형사상 조치를 취할 수 있습니다.</p>
+        <p>8. 회원권은 계약자 본인만 사용 가능하며, 타인/ 타 프로그램 사용 적발시 일일요금의 30배 부가됩니다.</p>
+        <p>9. 회원권 별 입장 횟수는 반드시 준수합니다. (브론즈-1일 1회/ 실버-1일 2회/ 골드-1일 1회/ VIP-1일 2회)</p>
+        <p>10. 무료주차 시간은 3시간에 한하며, 3시간 이후부터는 건물 내 규정에 의하여 주차비가 부가됩니다.</p>
+        <p>11. 타인의 물품에 손을 대거나 클럽 물품을 훼손 하는 경우, 손해배상 및 법적인 조치를 취할 수 있습니다.</p>
+        <p>12. 음주 후 센터이용은 절대 불가 합니다.</p>
+        <p>13. 센터 안 모든 장소에서 흡연은 절대불가 합니다.</p>
+        <p>14. 본인 부주의 또는 개인운동 중 부상을 입는 경우 본관에서는 책임을 지지 않습니다.</p>
+        <p>15. 불쾌감, 위압감 조성, 운동화 미착용 등 타인에게 피해를 가하는 회원으로 판단될 경우 본관에서는 퇴실 조치 할 수 있습니다.</p>
+        <p>16. 본 센터의 직원 외에 레슨 및 지도는 불가합니다. 적발시 퇴실 및 회원권 해지 조치가 가해집니다.</p>
+        <hr>
+        <p><strong>본인은 입회하는 날부터 상기 규정을 절대 준수 할 것이며, 회원가입을 신청합니다.</strong></p>
+
         <h3 style="float:right; margin:20px;"><input type="checkbox" id="agree" value="agree" style="width:20px;height:20px" required> 동의</h3>
     </tbody>
 
