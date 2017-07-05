@@ -51,7 +51,7 @@
     </tr>
     {% for member_history in member_history %}
     <tr>
-        <td><!--No--></td>
+        <td>{{member_history.Num}}</td>
         <td>{{member_history.registered_session}}</td>
         <td>{{member_history.PT_payment_amount}}</td>
         <td>{{member_history.PT_payment_method}}</td>

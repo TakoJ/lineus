@@ -98,6 +98,7 @@ class History(models.Model):
     PT_payment_amount = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='PT결제금액')
     PT_payment_method = models.CharField(max_length=12,blank=True ,verbose_name='PT결제방식')
     registered_date = models.DateField(default=timezone.now, verbose_name='PT등록일')
+    Num = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user
@@ -106,6 +107,11 @@ class Schedule(models.Model):
     Trainer = models.ForeignKey(User, null=True, related_name='schedule', on_delete=models.SET_NULL)
     title = models.CharField(max_length=12)
     birth = models.DateField(null=True,help_text='Ex) 1980-06-30',verbose_name='생년월일') #동명이인을 구별하기 위해 추가
+    registered_date = models.DateField(default=timezone.now, null=True, verbose_name='해당PT등록일')
+    # 다른 pt등록과 구분하기 위해(즉 어떤 history인지)
+    registered_session = models.CharField(max_length=24, null=True, blank=True,verbose_name='등록세션')
+    used_session = models.IntegerField(blank=True, null=True, default=0, verbose_name='사용한 세션') #
+
     start = models.DateTimeField()
     end = models.DateTimeField(blank=True,null=True) #optional
 

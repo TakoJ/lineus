@@ -148,6 +148,13 @@ def PT_register_create(request, member_id):
             history.user = member.name
             history.birth = member.birth
             history.Trainer=request.user
+            check = History.objects.filter(user=member.name).filter(birth=member.birth) #그동안 몇번 pt등록했는지 확인
+            if check.exists():
+                history_num = check.count()
+                history.Num = history_num + 1
+            else:
+                history.Num = 1
+
             history.save()
             return redirect('schedule')
 
@@ -187,23 +194,25 @@ def schedule_add(request):
 
         title = request.POST.get('title',None)
         member = Member.objects.get(id=request.POST.get('id')) #넘겨온 id의 회원 찾기
+        member.used_session = member.used_session+1 #사용된 세션1회추가
+        member.save() # +1 상태 저장
         Schedule.objects.create(
             Trainer=request.user,
             title = title, #받아온 data중 title 얻기
             start = start,
             end = end,
             birth= member.birth,
+            registered_date = member.registered_date,
+            used_session = member.used_session,
+            registered_session = member.registered_session,
             )
-        context={
-
-        }
         messages.info(request, '스케줄이 등록었습니다.')
         context={
-            'title':title,
+            'used_session':member.used_session,
         }
 
     else:
         context={
-            'title':title,
+            'used_session':member.used_session,
         }
     return HttpResponse(json.dumps(context), content_type='application/json')

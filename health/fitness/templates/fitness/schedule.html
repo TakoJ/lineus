@@ -100,7 +100,8 @@
 
                     success: function(response){
                         alert("완료!");
-                        // 요청이 성공했을 경우 좋아요/싫어요 개수 레이블 업데이트
+                        $('#used_session'+id).html(response.used_session);
+                        // 요청이 성공했을 경우 사용된 세션 +1
                     },
                     error:function(error){
                         // 요청이 실패했을 경우
@@ -191,7 +192,7 @@
                 },
                 {% for schedule in schedules%}
                     {
-                    title: '{{schedule.title}}',
+                    title: '{{schedule.title}} ({{schedule.used_session}}/{{schedule.registered_session}})',
                     start: new Date({{schedule.get_year}},{{schedule.get_month}},{{schedule.get_day}},{{schedule.get_hour}}+9,{{schedule.get_minute}}),//db에있는게 9시간 느리게 넘어와서  hour +9해줘야 제대로 적용됨.
                     end: new Date({{schedule.get_year}},{{schedule.get_month}},{{schedule.get_day}},{{schedule.get_hour}}+10,{{schedule.get_minute}}),//1시간 단위이므로 end는 +10
 
@@ -277,24 +278,27 @@
 
 <div style='clear:both'></div>
 </div>
-    <div class="text-center col-xs-3" style="border:1px solid black; float: right; margin-right: 30px;">
-        <h4>My PT member</h4>
-        {{PT_members.count}}명
-        <div class="my_PTmember"  style="text-align: center;">
-            {% for PT_member in PT_members %}
-                <a id="{{PT_member.id}}"  class="PT_member" style="display:inline-block; width:60%; float:left;"> <!-- href="{%url "PT_member_detail" PT_member.id %}" -->
-                    <span name="PT_member_name">{{PT_member.name}}</span>
-                    <p>{{PT_member.used_session}}/{{PT_member.registered_session}}</p>
-                </a>
-                <div style="display:inline-block; width:20%;float:left;">
-                    <form method="GET" action="">
-                    <a class="btn btn-default" href="{% url "PT_member_delete" PT_member.id %}">삭제</a>
-                    </form>
-                </div>
-            {% endfor %}
+    <div class="text-center col-xs-3" style="margin-right: 30px;">
+        <div  style="border:1px solid black; float: right;" >
+            <h4>My PT member</h4>
+            {{PT_members.count}}명
+            <div class="my_PTmember"  style="text-align: center;">
+                {% for PT_member in PT_members %}
+                    <div id="{{PT_member.id}}"  class="PT_member" style="display:inline-block; width:58%; float:left;">
+                        <span name="PT_member_name">{{PT_member.name}}</span>
+                        <p><span id="used_session{{PT_member.id}}">{{PT_member.used_session}}</span>/{{PT_member.registered_session}}</p>
+                    </div>
+                    <a class='btn btn-info' href="{% url "PT_member_detail" PT_member.id %}" style="display:inline-block;width:22%;float:left;">상세정보</a>
+                    <div style="display:inline-block; width:20%;float:left;">
+                        <form method="GET" action="">
+                        <a class="btn btn-default" href="{% url "PT_member_delete" PT_member.id %}">삭제</a>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+            <hr/>
         </div>
-        <hr/>
-      <p><a href="{% url 'PT_register' %}" class="btn btn-warning">추가</a></p>
+        <p><a href="{% url 'PT_register' %}" class="btn btn-warning">추가</a></p>
     </div>
-</div>
+
 {% endblock %}

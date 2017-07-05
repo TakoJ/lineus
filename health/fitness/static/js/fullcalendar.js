@@ -6107,12 +6107,6 @@ function HorizontalPositionCache(getElement) {
 
 }
 
-$('.fc-event-inner').click(function(){
 
-        alert("ss");
-
-    });
-
-;;
 
 })(jQuery);
