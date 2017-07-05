@@ -11,4 +11,6 @@ from django.contrib import admin
 # user = User.objects.create_user(Profile.name, Profile.email, Profile.password)
 
 admin.site.register(Member)
+admin.site.register(History)
+admin.site.register(Schedule)
 

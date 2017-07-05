@@ -147,4 +147,17 @@ if($('div').is('.PT_Register')){
     });
 
 }
+
+// if($('div').is('.schedule')){
+//    $('.PT_member').dblclick(function(){
+//         info = $(this).children('span').text();
+//         alert(info);
+//     });
+// }
+
+// $('.fc-event').click(function(){
+
+//         alert("ss");
+
+//     });
 });

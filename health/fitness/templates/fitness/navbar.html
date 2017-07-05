@@ -8,13 +8,26 @@
 <!-- 부가적인 테마 -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
-<!-- 합쳐지고 최소화된 최신 자바스크립트 -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
+<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/themes/base/jquery-ui.css"/>
+
+<link href='{% static "css/fullcalendar.css" %}' rel='stylesheet' />
+<link href='{% static "css/fullcalendar.print.css" %}' rel='stylesheet' media='print' />
+
 
 <!-- JS-->
-<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script><!-- 1.11.1 -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+
+<script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/jquery.min.js'></script>
+<script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/moment.min.js'></script>
+<script src="http://fullcalendar.io/js/fullcalendar-2.1.1/lib/jquery-ui.custom.min.js"></script>
+<script src='http://fullcalendar.io/js/fullcalendar-2.1.1/fullcalendar.min.js'></script>
+
+
+<!-- <script type="text/javascript" src="{% static 'js/jquery-1.10.2.js' %}"></script> -->
+<script type="text/javascript" src="{% static 'js/fullcalendar.js'%}"></script>
 <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
     <title>건강과 땀</title>
 </head>
@@ -30,10 +43,11 @@
         <li><a href="{% url 'authentication:logout' %}?next={% url 'home' %}">로그아웃</a></li>
         {% if user.groups == 'FC' %}
         <li><a href="{% url 'register' %}">회원가입 폼</a></li>
-        <li><a href="{% url 'mypage' %}">나의 페이지</a></li>
+        <li><a href="{% url 'mypage' %}">FC의 나의 페이지</a></li>
         {% elif user.groups == 'Fitness' or 'Pilates' %}
         <li><a href="{% url 'register' %}">회원가입 폼</a></li>
-        <li><a href="{% url 'PT_mypage' %}">나의 페이지</a></li>
+        <li><a href="{% url 'mypage' %}">FC의 나의 페이지</a></li>
+        <li><a href="{% url 'PT_mypage' %}">PT의 나의 페이지</a></li>
         <li><a href="{% url 'schedule' %}">스케줄 관리</a></li>
         {% else %}
         <li><a href="{% url 'register' %}">회원가입 폼</a></li>

@@ -1,0 +1,66 @@
+{% extends "fitness/navbar.html" %}
+{% block content %}
+<div class="PT_member_detail col-xs-8 col-xs-offset-2">
+<h3 class="text-center">회원 정보</h3>
+<table class='table'>
+<tbody>
+    <tr>
+        <td>성명</td>
+        <td>{{PT_member.name}}</td>
+    </tr>
+    <tr>
+        <td>성별</td>
+        <td>{{PT_member.sex}}</td>
+    </tr>
+    <tr>
+        <td>생년월일</td>
+        <td>{{PT_member.birth}}</td>
+    </tr>
+    <tr>
+        <td>휴대번호</td>
+        <td>{{PT_member.phone_num}}</td>
+    </tr>
+    <tr>
+        <td>회원권 등록기간</td>
+        <td>{{PT_member.start_date}} ~ {{PT_member.end_date}}</td>
+    </tr>
+    <tr>
+        <td>PT결제금액</td>
+        <td>{{PT_member.PT_payment_amount}}</td>
+    </tr>
+    <tr>
+        <td>1회세션단가</td>
+        <td>{{PT_member.PT_unitprice}}</td>
+    </tr>
+    <tr>
+        <td>결제방식</td>
+        <td>{{PT_member.PT_payment_method}}</td>
+    </tr>
+</tbody>
+</table>
+
+<table class='table'>
+<thead>
+    <tr>
+        <th>No</th>
+        <th>등록세션</th>
+        <th>결제금액</th>
+        <th>결제방식</th>
+        <th>결제일</th>
+        <th>Trainer</th>
+    </tr>
+    {% for member_history in member_history %}
+    <tr>
+        <td><!--No--></td>
+        <td>{{member_history.registered_session}}</td>
+        <td>{{member_history.PT_payment_amount}}</td>
+        <td>{{member_history.PT_payment_method}}</td>
+        <td>{{member_history.registered_date}}</td>
+        <td>{{member_history.Trainer}}</td>
+    </tr>
+    {% endfor %}
+</thead>
+<tbody></tbody>
+</table>
+</div>
+{% endblock %}

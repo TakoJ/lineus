@@ -72,6 +72,10 @@ a, a:hover, a:active, a:focus, button:focus {
 .schedule-table tr{
     height: 50px;
 }
+.schedule-table tbody tr td
+{
+     border-left:1px solid gray;
+}
 .schedule-table tbody tr td:first-child
 .schedule-table tbody tr th:first-child,{
     width: 10px;

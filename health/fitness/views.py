@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.utils.timezone import now
@@ -6,9 +7,10 @@ from django.db.models import Sum
 from django.db.models import Q
 from .models import *
 from staff.models import *
-from staff.forms import RegisterForm,PT_RegisterForm
+from staff.forms import RegisterForm,PT_RegisterForm,PT_Register_HistoryForm,Schedule_AddForm
 from datetime import timedelta
 import datetime
+import json
 
 
 def home(request):
@@ -35,7 +37,7 @@ def register(request):
         })
 
 def mypage(request):
-    members = request.user.members.all()
+    members = request.user.members.all() #member의 staff의 related_name='members'
     date = datetime.date.today() #오늘 받기
     #####오늘#####
     today_members = members.filter(start_date=date) #오늘 등록한 회원
@@ -89,22 +91,43 @@ def PT_mypage(request):
 
     return render(request, 'fitness/PT_mypage.html', context)
 
-def schedule(request):
-    PT_members = request.user.PT_members.all()
+def schedule(request): #스케줄 관리 페이지
+    schedules = request.user.schedule.all() #나의 스케줄
+    PT_members = request.user.PT_members.all() #나의 PT 회원들
+    date = datetime.date.today() #오늘 받기
     context = {
         'PT_members' : PT_members,
+        'date' : date,
+        'schedules' : schedules,
     }
     return render(request, 'fitness/schedule.html', context)
+
+def PT_member_detail(request, PT_member_id):
+    PT_member = Member.objects.get(id=PT_member_id)
+    member_history = History.objects.filter(user=PT_member).filter(birth=PT_member.birth) #이름과 생일 모두 일치하는 회원 기록만 불러오기
+
+    context = {
+        'PT_member' : PT_member,
+        'member_history' : member_history,
+    }
+    return render(request, 'fitness/PT_member_detail.html', context)
 
 def PT_member_delete(request, PT_member_id):
     # member = Member.objects.get(id=PT_member_id)
     for p in request.user.PT_members.filter(id=PT_member_id):
+        #PT_register할때 했던 것들 다 null로 바꾸기
         p.Trainer = None
+        p.registered_session = None
+        p.PT_payment_amount = None
+        p.PT_payment_method = None
+        p.unitprice = None
+        p.period_PT = None
+        p.registered_date = None
         p.save()
     messages.info(request, 'PT회원이 삭제되었습니다.')
     return redirect('schedule')
 
-def PT_register(request):
+def PT_register(request): #PT_register_list (회원리스트)
     member_list = Member.objects.all()
     context = {
         'member_list' : member_list,
@@ -116,17 +139,27 @@ def PT_register_create(request, member_id):
 
     if request.method == 'POST':
         form = PT_RegisterForm(request.POST , instance=member)
-        if form.is_valid():
+        form1 = PT_Register_HistoryForm(request.POST or None)
+        if form.is_valid() and form1.is_valid():
             member.Trainer=request.user
             form.save()
+            #PT 등록 기록 남기기
+            history = form1.save(commit=False)
+            history.user = member.name
+            history.birth = member.birth
+            history.Trainer=request.user
+            history.save()
             return redirect('schedule')
+
 
     else:
         form=PT_RegisterForm()
+        form1 = PT_Register_HistoryForm()
 
     return render(request, 'fitness/PT_register_create.html',{
         'member' : member,
         'form':form,
+        'form1':form1,
         })
 
 def search(request):
@@ -141,3 +174,36 @@ def search(request):
         'search_member' : search_member,
     }
     return render(request, 'fitness/search_result.html', context)
+
+
+def schedule_add(request):
+    if request.is_ajax():
+        start_original = request.POST.get('start',None)
+        s1 = start_original.split()[1:5] #korean standard time을 datetimefield 형식에 맞추기 위해 split ['Jul', '06','2017','08:00:00']
+        s = ' '.join(s1) #split후 다시 합치기
+        print(s)
+        start= datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S') #%T = %H:%M:%S
+        end = datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S')
+
+        title = request.POST.get('title',None)
+        member = Member.objects.get(id=request.POST.get('id')) #넘겨온 id의 회원 찾기
+        Schedule.objects.create(
+            Trainer=request.user,
+            title = title, #받아온 data중 title 얻기
+            start = start,
+            end = end,
+            birth= member.birth,
+            )
+        context={
+
+        }
+        messages.info(request, '스케줄이 등록었습니다.')
+        context={
+            'title':title,
+        }
+
+    else:
+        context={
+            'title':title,
+        }
+    return HttpResponse(json.dumps(context), content_type='application/json')

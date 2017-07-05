@@ -1,5 +1,5 @@
 from django import forms
-from .models import Member
+from .models import Member, History, Schedule
 
 class RegisterForm(forms.ModelForm):
     class Meta:
@@ -12,3 +12,13 @@ class PT_RegisterForm(forms.ModelForm):
     class Meta:
         model = Member
         fields = ('registered_session','PT_payment_amount','PT_payment_method','unitprice','period_PT')
+
+class PT_Register_HistoryForm(forms.ModelForm):
+    class Meta:
+        model = History
+        fields = ('registered_session','PT_payment_amount','PT_payment_method')
+
+class Schedule_AddForm(forms.ModelForm):
+    class Meta:
+        model = Schedule
+        fields = ('title','start','end','Trainer')
