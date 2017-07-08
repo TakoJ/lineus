@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | 건강과 땀{% endblock %}
+
+{% block extrastyle %}
+<style>
+ #header{
+    background-color: #6B6B6B; /* admin 헤더 색깔*/
+    color: yellow; /* header 글씨색*/
+ }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">건강과 땀</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

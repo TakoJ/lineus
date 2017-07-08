@@ -18,7 +18,7 @@
 var defaults = {
 
 	// display
-	defaultView: 'month',
+	defaultView: 'week',
 	aspectRatio: 1.35,
 	header: {
 		left: 'title',
@@ -4689,6 +4689,7 @@ function View(element, calendar, viewName) {
 	function eventElementHandlers(event, eventElement) {
 		eventElement
 			.click(function(ev) {
+
 				if (!eventElement.hasClass('ui-draggable-dragging') &&
 					!eventElement.hasClass('ui-resizable-resizing')) {
 						return trigger('eventClick', this, event, ev);
@@ -5785,6 +5786,7 @@ function DayEventRenderer() {
 					isResizing = false;
 				},0);
 			}
+
 		});
 	}
 

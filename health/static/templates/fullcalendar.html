@@ -1,4 +1,4 @@
-{% extends "fitness/navbar.html" %}
+{% extends "navbar.html" %}
 {% block content %}
 
 
@@ -189,8 +189,9 @@
 					title: '{{schedule.title}}',
 					start: new Date({{schedule.get_year}},{{schedule.get_month}},{{schedule.get_day}},{{schedule.get_hour}}+9,{{schedule.get_minute}}),
 					//db에있는게 9시간 느리게 넘어와서  hour +9해줘야 제대로 적용됨.
-					allDay: false,
-					className: 'success'
+					allDay: false,sf
+					className: 'success',
+					data-url: "{% url 'schedule_delete' %}"ssf
 					},
 				{% endfor %}
 			],

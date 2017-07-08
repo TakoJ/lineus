@@ -30,7 +30,9 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
+
 INSTALLED_APPS = [
+    'admin_menu', #pip install django-admin-menu
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -58,7 +60,7 @@ ROOT_URLCONF = 'health.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'static','templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -135,3 +137,16 @@ LOGIN_REDIRECT_URL = "/"
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # BOWER_COMPONENTS_ROOT = '/health/components/' #/PROJECT_ROOT/components/'
+
+ADMIN_LOGO = 'logo.png'
+
+MENU_WEIGHT = {
+    'Auth':4,
+    'Staff':20
+}
+
+ADMIN_STYLE = {
+    'primary-color': '#164B36',
+    'secondary-color': '#092117',
+    'tertiary-color': '#51B48E'
+}

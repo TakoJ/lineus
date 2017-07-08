@@ -1,7 +1,7 @@
 
 from django.conf.urls import url, include
 from django.contrib import admin
-from fitness.admin import admin_site
+# from fitness.admin import admin_site
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

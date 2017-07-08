@@ -1,4 +1,4 @@
-{% extends "fitness/navbar.html" %}
+{% extends "navbar.html" %}
 {% block content %}
 <div class="PT_Register col-xs-8 col-xs-offset-2">
 <h3 class="text-center">개인 트레이닝 계약서</h3>
@@ -23,6 +23,7 @@
         <td>등록세션</td>
         <td>
             <select name="registered_session" class="select form-control" id="registered_session" required>
+            <option value="">---------</option>
             <option value="10">10세션</option>
             <option value="20">20세션</option>
             <option value="30">30세션</option>

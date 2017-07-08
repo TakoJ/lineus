@@ -16,7 +16,7 @@ class PT_RegisterForm(forms.ModelForm):
 class PT_Register_HistoryForm(forms.ModelForm):
     class Meta:
         model = History
-        fields = ('registered_session','PT_payment_amount','PT_payment_method')
+        fields = ('registered_session','PT_payment_amount','PT_payment_method','unitprice','period_PT')
 
 class Schedule_AddForm(forms.ModelForm):
     class Meta:

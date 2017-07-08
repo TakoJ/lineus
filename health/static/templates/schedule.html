@@ -1,4 +1,4 @@
-{% extends "fitness/navbar.html" %}
+{% extends "navbar.html" %}
 {% block content %}
 <div class="schedule">
     <h2 class="text-center"><span style="padding:2px; border-bottom:2px solid green;">{{user}}의 스케줄 관리</span></h2>
@@ -72,7 +72,7 @@
             allDaySlot: false,
             selectHelper: true,
             select: function(start, end, allDay) { //시간 선택시
-                $('.PT_member').dblclick(function(){
+                $('.PT_member').unbind("click").bind("click", function(){
                 // var title = prompt('Event Title:');
                     title = $(this).children('span').text();
                     id = $(this).attr('id');
@@ -108,8 +108,46 @@
                         alert("실패다!");
                     }
                 });
+                this.click=null;
+            }); //click 종료시
 
-            }); //dblclick 종료시
+            $('.spare').unbind("click").bind("click", function(){ //예비 버튼 클릭시
+                    title = $(this).attr('name');
+                    id = $(this).attr('id');
+                    if (title) {
+                        calendar.fullCalendar('renderEvent',
+                            {
+                                title: title,
+                                start: start,
+                                end: end,
+                                allDay: allDay
+                            },
+
+                            true // make the event "stick"
+
+                        );
+                    }
+
+                calendar.fullCalendar('unselect');
+                var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "title":title, "start":start, "end":end, "id":id, };
+                $.ajax({
+                    url: "{% url 'schedule_add' %}", // 통신할 url을 지정한다.
+                    type: "POST",
+                    data: allData, // 서버로 데이터를 전송할 때 이 옵션을 사용한다.
+                    dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
+
+                    success: function(response){
+                        alert("완료!");
+                        $('#used_session'+id).html(response.used_session);
+                        // 요청이 성공했을 경우 사용된 세션 +1
+                    },
+                    error:function(error){
+                        // 요청이 실패했을 경우
+                        alert("실패다!");
+                    }
+                });
+
+            }); //예비버튼클릭 종료
         },
 
 
@@ -138,17 +176,11 @@
 
             },
 
+
             events: [
                 {
                     title: 'All Day Event',
                     start: new Date(y, m, 1)
-                },
-                {
-                    id: 999,
-                    title: 'Repeating Event',
-                    start: new Date(y, m, d-3, 16, 0),
-                    allDay: false,
-                    className: 'info'
                 },
                 {
                     id: 999,
@@ -158,56 +190,28 @@
                     className: 'info'
                 },
                 {
-                    title: 'Meeting',
-                    start: new Date(y, m, d, 10, 30),
-                    allDay: false,
-                    className: 'important'
-                },
-                {
-                    title: '지연이',
-                    start: new Date(2017, 06, 05, 1, 00),  //00 - 1월
-                    end: new Date(2017, 06, 05, 2, 00),
-                    allDay: false,
-                    className: 'important'
-                },
-                {
                     title: 'Lunch',
                     start: new Date(y, m, d, 12, 0),
                     end: new Date(y, m, d, 14, 0),
                     allDay: false,
                     className: 'important'
                 },
-                {
-                    title: 'Click for Google',
-                    start: new Date(y, m, 28),
-                    end: new Date(y, m, 29),
-                    url: 'http://google.com/',
-                    className: 'success'
-                },
-                {
-                    title: '오후3시!!',
-                    start: new Date(2017, 6, 6,15,00),
-                    allDay: false,
-                    className: 'success'
-                },
                 {% for schedule in schedules%}
                     {
+                    id : '{{schedule.title}}',
                     title: '{{schedule.title}} ({{schedule.used_session}}/{{schedule.registered_session}})',
                     start: new Date({{schedule.get_year}},{{schedule.get_month}},{{schedule.get_day}},{{schedule.get_hour}}+9,{{schedule.get_minute}}),//db에있는게 9시간 느리게 넘어와서  hour +9해줘야 제대로 적용됨.
                     end: new Date({{schedule.get_year}},{{schedule.get_month}},{{schedule.get_day}},{{schedule.get_hour}}+10,{{schedule.get_minute}}),//1시간 단위이므로 end는 +10
 
                     allDay: false,
-                    className: 'success'
+                    className: 'success',
+                    url: "{% url 'schedule_delete' schedule.id %}"
                     },
                 {% endfor %}
             ],
         });
-    $('.fc-event-inner').click(function(){
-        alert("ss");
 
-    });
-
-    });
+});
 
 </script>
 <style>
@@ -284,16 +288,24 @@
             {{PT_members.count}}명
             <div class="my_PTmember"  style="text-align: center;">
                 {% for PT_member in PT_members %}
-                    <div id="{{PT_member.id}}"  class="PT_member" style="display:inline-block; width:58%; float:left;">
+                <div class="per_PTmember" style="float:left;">
+                    <a id="{{PT_member.id}}" class='spare btn btn-default' name="{{PT_member.name}}(예비)" style="float:left;">예비</a>
+                    <div id="{{PT_member.id}}"  class="PT_member" style="display:inline-block; margin: 0 15px; float:left;">
                         <span name="PT_member_name">{{PT_member.name}}</span>
+                        {%if PT_member.re_registered %} <!--재등록여부가 true면-->
+                        <p><span id="used_session{{PT_member.id}}">{{PT_member.used_session}}</span>/{{PT_member.registered_session}}+재</p>
+                        {% else %} <!--재등록여부가 false면-->
                         <p><span id="used_session{{PT_member.id}}">{{PT_member.used_session}}</span>/{{PT_member.registered_session}}</p>
+                        {% endif %}
                     </div>
-                    <a class='btn btn-info' href="{% url "PT_member_detail" PT_member.id %}" style="display:inline-block;width:22%;float:left;">상세정보</a>
-                    <div style="display:inline-block; width:20%;float:left;">
+                    <a class='btn btn-info' href="{% url "PT_member_detail" PT_member.id %}" style="float:left;">상세정보</a>
+                    <a class='btn btn-info' href="{% url "PT_member_session_end" PT_member.id %}" style="float:left;">해당세션 종료</a>
+                    <div style="display:inline-block; float:left;">
                         <form method="GET" action="">
                         <a class="btn btn-default" href="{% url "PT_member_delete" PT_member.id %}">삭제</a>
                         </form>
                     </div>
+                </div>
                 {% endfor %}
             </div>
             <hr/>

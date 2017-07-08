@@ -11,7 +11,7 @@ def signup(request):
             return redirect(settings.LOGIN_URL)
     else:
         form= SignupForm()
-    return render(request, 'fitness/signup.html', {
+    return render(request, 'signup.html', {
         'form':form,
         })
 
