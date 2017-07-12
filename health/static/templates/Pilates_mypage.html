@@ -1,0 +1,66 @@
+{% extends "navbar.html" %}
+{% block content %}
+<h2 class="text-center"><span class="header">{{user}}의 My page</span></h2>
+<hr/>
+<div class="col-xs-6 col-xs-offset-3">
+
+<div class="btn btn-default">전체</div>
+{{PT_members.count}}명
+
+<div class="btn btn-default">오늘</div>
+{{today_members.count}}명
+<span>{{today_members_pay}}원</span>
+
+<div class="btn btn-default">이번주</div>
+{{thisweek_members.count}}명
+<span>{{thisweek_members_pay}}원</span>
+
+<div class="btn btn-default">이번달</div>
+<span>{{thismonth_members.count}}명</span>
+<span>{{thismonth_members_pay}}원</span>
+
+<hr>
+
+<div style="display: inline;">
+<a class="btn btn-warning">저번달 기본급</a>
+<span>원</span>
+</div>
+
+
+<div class="btn btn-warning">저번달 커미션</div>
+<span>원</span>
+
+
+
+<div class="btn btn-warning">저번달 수업료</div>
+<span>명</span>
+<span>원</span>
+
+
+
+<div class="btn btn-warning">저번달 총합계</div>
+<span>원</span>
+
+<hr>
+
+<div class="btn btn-danger">이번달 기본급</div>
+<span>원</span>
+
+
+
+<div class="btn btn-danger">이번달 커미션</div>
+<span>원</span>
+
+
+
+<div class="btn btn-danger">이번달 수업료</div>
+<span>명</span>
+<span>원</span>
+
+
+
+<div class="btn btn-danger">이번달 총합계</div>
+<span>원</span>
+
+</div>
+{% endblock %}

@@ -6,5 +6,6 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('fitness.urls')),
+    url(r'^management/', include('management.urls', namespace='management')),
     url(r'^authentication/', include('authentication.urls', namespace='authentication')),
 ]

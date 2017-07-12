@@ -1,0 +1,21 @@
+{% extends "navbar.html" %}
+{% block content %}
+<h2 class="text-center"><span class="header">스케줄 관리</span></h2>
+
+<div class="container">
+    <table class='table table-bordered text-center'>
+        <tr>
+            <th>이름</th>
+            <th>생년월일</th>
+            <th>팀</th>
+        </tr>
+        {% for staff in staff_list %}
+        <tr>
+            <td><a href="{% url "management:staff_schedule" staff.id %}">{{ staff }}</a></td>
+            <td>{{ staff.birth }}</td>
+            <td>{{ staff.groups.all.0 }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

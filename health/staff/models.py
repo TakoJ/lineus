@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.core.validators import RegexValidator
 from django.utils import timezone
@@ -19,7 +20,7 @@ class Member(models.Model):
     start_date = models.DateField(default=timezone.now, verbose_name='등록일')
     end_date = models.DateField(default=(datetime.now() + timedelta(days=30)), verbose_name='회원권종료일')
     #Staff와 1:n 관계, staff삭제시 null값적용
-    staff = models.ForeignKey(User, null=True, related_name='members', on_delete=models.SET_NULL)
+    staff = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, related_name='members', on_delete=models.SET_NULL)
 
     # 회원권 세부사항
     type_choice = models.CharField(max_length=12,default='피트니스',verbose_name='종류선택')
@@ -40,7 +41,7 @@ class Member(models.Model):
         ('10세션/60일','10세션/60일'),
         ('20세션/90일','20세션/90일'),
     )
-    Trainer = models.ForeignKey(User, null=True, blank=True, related_name='PT_members', on_delete=models.SET_NULL)
+    Trainer = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='PT_members', on_delete=models.SET_NULL)
     registered_session = models.CharField(max_length=24, null=True, blank=True,verbose_name='등록세션')
     PT_payment_amount = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True, default=0,verbose_name='PT결제금액')
     PT_payment_method = models.CharField(max_length=12, null=True, blank=True ,verbose_name='PT결제방식')
@@ -98,7 +99,7 @@ class Member(models.Model):
 class History(models.Model):
     user = models.ForeignKey(Member, max_length=12, verbose_name='성명', related_name='History') #ForeignKey로 하면 def __str__에서 오류 난다.
     birth = models.DateField(null=True, blank=True,help_text='Ex) 1980-06-30',verbose_name='생년월일') #동명이인을 구별하기 위해 추가
-    Trainer = models.ForeignKey(User, null=True, blank=True, related_name='Trainer', on_delete=models.SET_NULL)
+    Trainer = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='Trainer', on_delete=models.SET_NULL)
     registered_session = models.CharField(max_length=24, blank=True,verbose_name='등록세션')
     PT_payment_amount = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='PT결제금액')
     PT_payment_method = models.CharField(max_length=12,blank=True ,verbose_name='PT결제방식')
@@ -110,14 +111,19 @@ class History(models.Model):
 
 
 class Schedule(models.Model):
-    Trainer = models.ForeignKey(User,blank=True,null=True, related_name='schedule', on_delete=models.SET_NULL)
+    Trainer = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True,null=True, related_name='schedule', on_delete=models.SET_NULL)
     title = models.CharField(max_length=12,blank=True,)
     name = models.ForeignKey(Member, null=True, verbose_name='회원이름')
     birth = models.DateField(null=True,blank=True,help_text='Ex) 1980-06-30',verbose_name='생년월일') #동명이인을 구별하기 위해 추가
     registered_date = models.DateField(default=timezone.now, null=True, blank=True, verbose_name='해당PT등록일')
     # 다른 pt등록과 구분하기 위해(즉 어떤 history인지)
     registered_session = models.CharField(max_length=24, null=True, blank=True,verbose_name='등록세션')
-    used_session = models.IntegerField(blank=True, null=True, default=0, verbose_name='사용한 세션') #
+    used_session = models.IntegerField(blank=True, null=True, default=0, verbose_name='사용한 세션')
+    unitprice = models.DecimalField(max_digits=10, decimal_places=0, blank=True, null=True, verbose_name='1회세션단가')
+
+    #pilates GX
+    GX = models.BooleanField(blank=True, default=False, verbose_name='GX 여부')
+    number = models.IntegerField(blank=True, null=True, default=1, verbose_name='GX명수')
 
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(blank=True,null=True) #optional

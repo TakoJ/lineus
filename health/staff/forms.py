@@ -1,5 +1,6 @@
 from django import forms
 from .models import Member, History, Schedule
+from functools import partial
 
 class RegisterForm(forms.ModelForm):
     class Meta:
@@ -22,3 +23,9 @@ class Schedule_AddForm(forms.ModelForm):
     class Meta:
         model = Schedule
         fields = ('title','start','end','Trainer')
+
+class DateRangeForm(forms.Form):
+    DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+    start_date = forms.DateField(widget=DateInput())
+    end_date = forms.DateField(widget=DateInput())

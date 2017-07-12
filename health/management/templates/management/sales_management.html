@@ -1,0 +1,112 @@
+{% extends "navbar.html" %}
+{% load humanize %} <!-- |intcomma를 쓰기 위한 load (숫자 3자리 마다 , 찍어줌. settings.py의 installed app에도 install했다.)-->
+{% block content %}
+<h2 class="text-center"><span class="header">매출 관리</span></h2>
+
+<div class="col-xs-8 col-xs-offset-2 text-center">
+    <form id="sales_search" action="{% url 'management:sales_search' %}" method="GET">
+        <select title="team_choice" name="team_choice" class="select my-control" id="team_choice">
+            <option name='FC' value="FC" {% if team == 'FC' %} selected {% endif %}>FC</option>
+            <option name='Fitness' value="Fitness" {% if team == 'FC' %} selected {% endif %}>피트니스</option>
+            <option name='Pilates' value="Pilates" {% if team == 'FC' %} selected {% endif %}>필라테스</option>
+            <option name='All' value="All" {% if team == 'All' %} selected {% endif %}>전체</option>
+        </select>
+        <!-- class="datepicker해도 됨." -->
+        <span><input type="date" class="startdate my-control" name="startdate" value="{{ startdate }}" ></span>
+         ~ <span><input type="date" class="enddate my-control"  name="enddate"  value="{{ enddate }}" ></span>
+        <a id="today" class="btn btn-warning">오늘</a>
+        <button type="submit" class="btn btn-info" value="검색" >검색</button>
+    </form>
+
+    <hr/>
+
+    <table class="table table-bordered" style="border:1px solid black;">
+        <tr>
+            <th>총합</th>
+            <th>{{total |intcomma}}원</th>
+        </tr>
+        {% if lists %}
+        <tr style="color:#c9b9a9;">
+            <th>이름</th>
+            <th>매출</th>
+        </tr>
+        {% for list in lists %}
+        <tr>
+            <td>{{list.f}}</td>
+            <td>{{list.members_pay |intcomma}}원</td>
+        </tr>
+        {% endfor %}
+
+        {% else %}  <!-- 전체를 클릭했을 시-->
+        <tr>
+            <th>팀</th>
+            <td>이름</td>
+            <td>매출</td>
+        </tr>
+        <tr>
+            <th rowspan="{{fc}}" class="warning" >FC팀</th>
+            <th>FC팀 총합</th>
+            <th>{{fc_total | intcomma}}원</th>
+        </tr>
+        {% for fc_list in fc_lists %}
+        <tr>
+            <td>{{fc_list.fc}}</td>
+            <td>{{fc_list.fc_members_pay |intcomma}}원</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <th rowspan="{{fit}}" class="info">Fitness팀</th>
+            <th>Fitness팀 총합</th>
+            <th>{{fit_total |intcomma}}원</th>
+        </tr>
+        {% for fit_list in fit_lists %}
+        <tr>
+            <td>{{fit_list.fit}}</td>
+            <td>{{fit_list.fit_members_pay |intcomma}}원</td>
+        </tr>
+        {% endfor %}
+
+         <tr>
+            <th rowspan="{{pil}}" class="danger">Pilates팀</th>
+            <th>Pilates팀 총합</th>
+            <th>{{pil_total|intcomma}}원</th>
+        </tr>
+        {% for pil_list in pil_lists %}
+        <tr>
+            <td>{{pil_list.pil}}</td>
+            <td>{{pil_list.pil_members_pay |intcomma}}원</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+
+    </table>
+</div>
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<!-- <script>
+$(document).ready(function() {
+    $('.datepicker').datepicker();
+});
+</script> -->
+<script type="text/javascript">
+    //당선택 버튼 처리
+    $('#today').click(function(){
+
+        $.ajax({
+            url: "{% url 'management:set_today' %}",
+            data: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+
+            success: function(response){
+                $('.startdate').val(response.startdate);
+                $('.enddate').val(response.enddate);
+            },
+            error: function(error){
+                alert("실패다");
+            }
+        });
+
+    });
+</script>
+{% endblock %}

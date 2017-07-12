@@ -38,25 +38,27 @@
     <div class="container">
     <a class="navbar-brand" href="{% url 'home' %}" style="float: left; margin-top: -10px; margin-left: -150px;"><img src="/static/img/logo.png" alt="Logo" style="float: left;"></a>
     <ul class="nav nav-tabs navbar-right">
-
+{% load user_tags %}
         {% if user.is_authenticated %}
         <li><a href="{% url 'authentication:logout' %}?next={% url 'home' %}">로그아웃</a></li>
             {% if request.user.is_superuser %}
-            <li><a href="{% url 'sales' %}">매출 관리</a></li>
+            <li><a href="{% url 'management:member_management' %}">회원 관리</a></li>
+            <li><a href="{% url 'management:schedule_management' %}">스케줄 관리</a></li>
+            <li><a href="{% url 'management:commission_management' %}">커미션관리</a></li>
+            <li><a href="{% url 'management:sales_management' %}">매출 관리</a></li>
             {% else %}
-                {% if request.user.Groups == 'FC' %}
+                {% if request.user|has_group:"FC" %}
                 <li><a href="{% url 'register' %}">회원가입 폼</a></li>
                 <li><a href="{% url 'mypage' %}">FC의 나의 페이지</a></li>
                 {% else %}
                 <li><a href="{% url 'register' %}">회원가입 폼</a></li>
-                <li><a href="{% url 'mypage' %}">FC의 나의 페이지</a></li>
+                <li><a href="{% url 'management:commission_management' %}">커미션관리</a></li>
                 <li><a href="{% url 'PT_mypage' %}">PT의 나의 페이지</a></li>
                 <li><a href="{% url 'schedule' %}">스케줄 관리</a></li>
                 {% endif %}
              {% endif %}
         {% else %}
         <li><a href="{% url 'authentication:login' %}">로그인</a></li>
-        <li><a href="{% url 'authentication:signup' %}">회원가입</a></li>
         {% endif %}
 
     </ul>

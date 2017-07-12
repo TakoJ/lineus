@@ -43,6 +43,12 @@ INSTALLED_APPS = [
     'authentication',
     'crispy_forms',
     'staff',
+    'management',
+    'django.contrib.humanize',
+    #to use reset_db
+    'django_extensions',
+    #django-el-pagination
+    'el_pagination',
 ]
 
 MIDDLEWARE = [
@@ -138,15 +144,9 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # BOWER_COMPONENTS_ROOT = '/health/components/' #/PROJECT_ROOT/components/'
 
-ADMIN_LOGO = 'logo.png'
 
-MENU_WEIGHT = {
-    'Auth':4,
-    'Staff':20
-}
 
-ADMIN_STYLE = {
-    'primary-color': '#164B36',
-    'secondary-color': '#092117',
-    'tertiary-color': '#51B48E'
-}
+AUTH_USER_MODEL = 'authentication.User'
+
+# El_pagination settings
+EL_PAGINATION_DEFAULT_CALLABLE_ARROWS = True # 맨 앞, 맨 뒤로 가기

@@ -1,0 +1,14 @@
+{% extends "navbar.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<h2 class="text-center"><span class="header">회원 정보 수정</span></h2>
+
+<div class="container">
+    <form method="POST">
+        {% csrf_token %}
+        {{ form | crispy}}
+        <button type="submit" class="btn btn-info">수정</button>
+        <hr/>
+    </form>
+</div>
+{% endblock %}

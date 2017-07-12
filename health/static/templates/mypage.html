@@ -1,24 +1,98 @@
 {% extends "navbar.html" %}
+{% load humanize %}
 {% block content %}
-<h2 class="text-center"><span style="padding:2px; border-bottom:2px solid green;">{{user}}의 My page</span></h2>
+<h2 class="text-center"><span class="header">{{user}}의 My page</span></h2>
 <hr/>
 <div class="col-xs-6 col-xs-offset-3">
 <div class="btn btn-default">전체</div>
 {{members.count}}명
- <hr>
+
 
 <div class="btn btn-default">오늘</div>
 {{today_members.count}}명
 <span>{{today_members_pay}}원</span>
-<hr>
+
 
 <div class="btn btn-default">이번주</div>
 {{thisweek_members.count}}명
 <span>{{thisweek_members_pay}}원</span>
-<hr>
 
 <div class="btn btn-default">이번달</div>
 <span>{{thismonth_members.count}}명</span>
 <span>{{thismonth_members_pay}}원</span>
+
+<hr/>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-success">저번달 FC팀 총 매출</a>
+<p>{{ last_total|intcomma }}원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-success">저번달 나의 총 매출</a>
+<p>{{ lastmonth_members_pay |intcomma }}원</p>
+</div>
+
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-warning">저번달 기본급</a>
+<p>{{basic_salary |intcomma}}원</p>
+</div>
+
+
+    <div class="text-center" style="display: inline-block;">
+    <a class="btn btn-warning">저번달 커미션</a>
+    <p>({{ last_commission_rate }}%) / {{ last_commission |intcomma}}원</p>
+    </div>
+{% if request.user.teamleader %} <!-- 팀장이면 팀 수당만 있음. -->
+
+{% else %}
+
+    <div class="text-center" style="display: inline-block;">
+    <a class="btn btn-warning">저번달 개인 커미션</a>
+    <p>({{ last_personal_commission_rate }}%) / {{ last_personal_commission |intcomma}}원</p>
+    </div>
+
+{% endif %}
+
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-warning">저번달 월급</a>
+<p>{{ last_salary |intcomma}}원</p>
+</div>
+
+<hr/>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-success">이번달 FC팀 총 매출</a>
+<p>{{ this_total|intcomma }}원</p>
+</div>
+
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 기본급</a>
+<p>{{basic_salary |intcomma}}원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 커미션</a>
+<p>({{ this_commission_rate }}% ) / {{ this_commission |intcomma}}원</p>
+</div>
+
+{% if request.user.teamleader %} <!-- 팀장이면 팀 수당만 있음. -->
+{% else %}
+    <div class="text-center" style="display: inline-block;">
+    <a class="btn btn-danger">이번달 개인 커미션</a>
+    <p>({{ this_personal_commission_rate }}%) / {{ this_personal_commission |intcomma}}원</p>
+    </div>
+
+{% endif %}
+
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 월급</a>
+<p>{{ this_salary |intcomma}}원</p>
+</div>
+
 </div>
 {% endblock %}

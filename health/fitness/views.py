@@ -7,6 +7,8 @@ from django.db.models import Sum
 from django.db.models import Q
 from .models import *
 from staff.models import *
+from management.models import *
+from authentication.models import User
 from staff.forms import RegisterForm,PT_RegisterForm,PT_Register_HistoryForm,Schedule_AddForm
 from datetime import timedelta
 import datetime
@@ -36,7 +38,7 @@ def register(request):
         'form': form,
         })
 
-def mypage(request):
+def mypage(request): # FC팀의 마이페이지
     members = request.user.members.all() #member의 staff의 related_name='members'
     date = datetime.date.today() #오늘 받기
     #####오늘#####
@@ -51,7 +53,75 @@ def mypage(request):
     ####이번달####
     this_month_start = datetime.datetime(date.year, date.month, 1)
     thismonth_members = members.filter(start_date__range=[this_month_start, date])
-    thismonth_members_pay = thismonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
+    thismonth_members_pay = thismonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if thismonth_members else 0
+    ###저번달
+    if date.month == 1: #1월이면, 작년 12월 return
+        year = date.year-1
+        last_month= 12
+    else:
+        year = date.year
+        last_month = date.month-1
+
+    lastmonth_members = members.filter(start_date__year=year).filter(start_date__month=last_month)
+    lastmonth_members_pay = lastmonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if lastmonth_members else 0
+    ########커미션#########
+    last_total = int(0)
+    this_total = int(0)
+    basic_salary = request.user.basic_salary
+    team_members = User.objects.filter(groups__name='FC') #FC 팀 직원들
+
+    for f in team_members:
+        members = f.members.all()
+        last_members = members.filter(start_date__year=year).filter(start_date__month=last_month) #지난달 등록한 회원들
+        members_pay = last_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if last_members else 0 #Suspect some of members is None
+        last_total = last_total + members_pay #저번달 팀 총 매출
+
+        this_members = members.filter(start_date__year=year).filter(start_date__month=date.month) #이번달 등록한 회원들
+        this_members_pay = this_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if this_members else 0 #Suspect some of members is None
+        this_total = this_total + this_members_pay # 이번달 팀 총 매출
+
+    #팀장이면
+    if request.user.teamleader == True:
+        last_commissions = FC_Teamleader_Commission.objects.filter(min_sales__lte=last_total).filter(max_sales__gt=last_total)
+        this_commissions = FC_Teamleader_Commission.objects.filter(min_sales__lte=this_total).filter(max_sales__gt=this_total)
+
+        last_personal_commission_rate = float(0)
+        last_personal_commission = float(0)
+        this_personal_commission_rate = float(0)
+        this_personal_commission = float(0  )
+
+     #팀원이면
+    else:
+        last_commissions = FC_Team_Commission.objects.filter(min_sales__lte=last_total).filter(max_sales__gt=last_total)
+        this_commissions = FC_Team_Commission.objects.filter(min_sales__lte=this_total).filter(max_sales__gt=this_total)
+
+        last_personal_commissions = FC_Personal_Commission.objects.filter(min_personal_sales__lte =lastmonth_members_pay).filter(max_personal_sales__gt=lastmonth_members_pay).filter(personnel=team_members.count()-1) #팀장제외 팀원들 인원 필터링
+        this_personal_commissions = FC_Personal_Commission.objects.filter(min_personal_sales__lte =thismonth_members_pay).filter(max_personal_sales__gt=thismonth_members_pay).filter(personnel=team_members.count()-1)
+
+        for pc in last_personal_commissions:
+            last_personal_commission_rate = pc.commission
+
+        last_personal_commission = int(lastmonth_members_pay) * last_personal_commission_rate/100
+
+        for pc in this_personal_commissions:
+            this_personal_commission_rate = pc.commission
+
+        this_personal_commission = int(thismonth_members_pay) * this_personal_commission_rate/100
+
+    #팀장, 팀원 공통
+    for c in last_commissions:
+        last_commission_rate = c.commission
+
+    last_commission = float(last_total) * last_commission_rate/100
+
+    for c in this_commissions:
+        this_commission_rate = c.commission
+
+    this_commission = float(this_total) * this_commission_rate/100
+
+    last_salary = int(request.user.basic_salary) + int(last_commission)
+    this_salary = int(request.user.basic_salary) + int(this_commission)
+
     context={
         'members' : members,
         'today_members' : today_members,
@@ -60,25 +130,110 @@ def mypage(request):
         'thisweek_members_pay' :thisweek_members_pay,
         'thismonth_members' : thismonth_members,
         'thismonth_members_pay' : thismonth_members_pay,
+        'lastmonth_members_pay' : lastmonth_members_pay,
+        #커미션#
+        'basic_salary' : basic_salary,
+        'last_total' : last_total,
+        'last_commission_rate' : last_commission_rate,
+        'last_commission' : last_commission,
+        'last_salary' : last_salary,
+        #이번달 커미션#
+        'this_total' : this_total,
+        'this_commission_rate': this_commission_rate,
+        'this_commission' : this_commission,
+        'this_salary' : this_salary,
+        #팀원 개인수당
+        'last_personal_commission_rate':last_personal_commission_rate,
+        'last_personal_commission' : last_personal_commission,
+        'this_personal_commission_rate' : this_personal_commission_rate,
+        'this_personal_commission' : this_personal_commission,
     }
     return render(request, 'mypage.html', context)
 
-def PT_mypage(request):
+def PT_mypage(request): #피트니스의 마이페이지
     PT_members = request.user.PT_members.all()
     date = datetime.date.today() #오늘 받기
     #####오늘#####
-    today_members = PT_members.filter(start_date=date) #오늘 등록한 회원
-    today_members_pay = today_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
+    today_members = PT_members.filter(registered_date=date) #오늘 등록한 회원
+    today_members_pay = today_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
     #####이번주####
     start_week = date- datetime.timedelta(date.weekday()) #이번주(월요일시작)
     end_week = start_week + datetime.timedelta(6) #월요일 + 6 (일요일)
     this_month = datetime.timedelta(date.month)
-    thisweek_members = PT_members.filter(start_date__range=[start_week, end_week])
-    thisweek_members_pay = thisweek_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
+    thisweek_members = PT_members.filter(registered_date__range=[start_week, end_week])
+    thisweek_members_pay = thisweek_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
     ####이번달####
-    this_month_start = datetime.datetime(date.year, date.month, 1)
-    thismonth_members = PT_members.filter(start_date__range=[this_month_start, date])
-    thismonth_members_pay = thismonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
+    this_month_start = datetime.datetime(date.year, date.month, 1) #이번달의 1일
+    thismonth_members = PT_members.filter(registered_date__range=[this_month_start, date])
+    thismonth_members_pay = thismonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if thismonth_members else 0
+
+    ###저번달
+    if date.month == 1: #1월이면, 작년 12월 return
+        year = date.year-1
+        last_month= 12
+    else:
+        year = date.year
+        last_month = date.month-1
+
+    lastmonth_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=last_month)
+    lastmonth_members_pay = lastmonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if lastmonth_members else 0
+    #####커미션##########
+    basic_salary = request.user.basic_salary
+    last_total=int(0)
+    last_tuition = int(0)
+    this_total=int(0)
+    this_tuition = int(0)
+
+    team_members = User.objects.filter(groups__name='Fitness') #피트니스 팀 직원들
+    lastmonth_schedules = Schedule.objects.filter(Trainer=request.user).filter(start__year=year).filter(start__month=last_month) #지난달에 pt받은 회원들
+    thismonth_schedules = Schedule.objects.filter(Trainer=request.user).filter(start__year=date.year).filter(start__month=date.month) #이번달에 pt받은 회원들
+
+    for f in team_members:
+        PT_members = f.PT_members.all()
+        last_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=last_month) #지난달 등록한 Fitness PT회원들
+        members_pay = last_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if last_members else 0 #Suspect some of members is None
+        last_total = last_total + members_pay #저번달 팀 총 매출
+        this_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=date.month) #이번달 등록한 Fitness PT회원들
+        this_members_pay = this_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if this_members else 0 #Suspect some of members is None
+        this_total = this_total + this_members_pay # 이번달 팀 총 매출
+
+    #팀장이면
+    if request.user.teamleader == True:
+        last_commissions = Fitness_Teamledaer_Commission.objects.filter(min_sales__lte=last_total).filter(max_sales__gt=last_total)
+        this_commissions = Fitness_Teamledaer_Commission.objects.filter(min_sales__lte=this_total).filter(max_sales__gt=this_total)
+
+    #팀원이면
+    else:
+        print("팀장이 아닙니다.")
+        last_commissions = Fitness_Personal_Commission.objects.filter(min_personal_sales__lte=lastmonth_members_pay).filter(max_personal_sales__gt=lastmonth_members_pay)
+        this_commissions = Fitness_Personal_Commission.objects.filter(min_personal_sales__lte=thismonth_members_pay).filter(max_personal_sales__gt=thismonth_members_pay)
+
+
+    for c in last_commissions:
+        last_commission_rate = c.commission
+        last_tuition_commission = c.tuition_commission
+
+    last_commission = float(last_total) * last_commission_rate/100
+
+    for c in this_commissions:
+        this_commission_rate = c.commission
+        this_tuition_commission = c.tuition_commission
+
+    this_commission = float(this_total) * this_commission_rate/100
+
+    for s in lastmonth_schedules:
+        last_personal_tuition = s.unitprice * last_tuition_commission/100
+        last_tuition = last_tuition + last_personal_tuition
+
+    for s in thismonth_schedules:
+        print(s.unitprice)
+        this_personal_tuition = s.unitprice * this_tuition_commission/100
+        this_tuition = this_tuition + this_personal_tuition
+
+    last_salary = int(request.user.basic_salary) + int(last_commission) + int(last_tuition)
+    this_salary = int(request.user.basic_salary) + int(this_commission) + int(this_tuition)
+
+
     context={
         'PT_members' : PT_members,
         'today_members' : today_members,
@@ -87,6 +242,24 @@ def PT_mypage(request):
         'thisweek_members_pay' :thisweek_members_pay,
         'thismonth_members' : thismonth_members,
         'thismonth_members_pay' : thismonth_members_pay,
+        'basic_salary' :basic_salary,
+
+        'lastmonth_members_pay' :lastmonth_members_pay,
+        #지난달
+        'last_total' : last_total,
+        'last_commission_rate' : last_commission_rate,
+        'last_commission' : last_commission,
+        'last_tuition_commission' : last_tuition_commission,
+        'last_tuition' : last_tuition,
+        'last_salary' : last_salary,
+        #이번달
+        'this_total' : this_total,
+        'this_commission_rate' : this_commission_rate,
+        'this_commission' : this_commission,
+        'this_tuition_commission' : this_tuition_commission,
+        'this_tuition' : this_tuition,
+        'this_salary' : this_salary,
+
     }
 
     return render(request, 'PT_mypage.html', context)
@@ -115,7 +288,7 @@ def PT_member_detail(request, PT_member_id):
 def PT_member_session_end(request, PT_member_id):
     p = Member.objects.get(id=PT_member_id)
     if p.re_registered==True: #재등록회원이라면
-        for h in History.objects.filter(user=p.name).filter(birth=p.birth).filter(registered_date__gt=p.registered_date): #큰쪽이 더 최신날짜
+        for h in History.objects.filter(user=p).filter(birth=p.birth).filter(registered_date__gt=p.registered_date): #큰쪽이 더 최신날짜
         #해당회원의 히스토리중, 만료된 세션 등록일보다 더 최근에 등록한 히스토리를 찾는다.
             p.Trainer = h.Trainer
             p.registered_session = h.registered_session
@@ -220,56 +393,73 @@ def schedule_add(request):
         start_original = request.POST.get('start',None)
         s1 = start_original.split()[1:5] #korean standard time을 datetimefield 형식에 맞추기 위해 split ['Jul', '06','2017','08:00:00']
         s = ' '.join(s1) #split후 다시 합치기
-        print(s)
         start= datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S') #%T = %H:%M:%S
         end = datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S')
 
         title = request.POST.get('title',None)
-        member = Member.objects.get(id=request.POST.get('id')) #넘겨온 id의 회원 찾기
+        if 'GX' in title: # GX추가라면,
+            number = request.POST.get('number',None)
+            Schedule.objects.create(
+                Trainer = request.user,
+                title = title,
+                start = start,
+                end = end,
+                GX = True,
+                number = number
+                )
+            context={}
 
-        succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(registered_date=member.registered_date).filter(start__gt=start).filter(~Q(title__icontains='예비')) #뒤에 있는 스케줄들
+        else:
+            member = Member.objects.get(id=request.POST.get('id')) #넘겨온 id의 회원 찾기
+
+            succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(registered_date=member.registered_date).filter(start__gt=start).filter(~Q(title__icontains='예비')) #뒤에 있는 스케줄들
 
 
-        if succeeding_schedule.exists(): #현재 추가하는 스케줄보다 뒤에 스케줄이 있다면
-            first_succeeding_schedule = succeeding_schedule.latest('start') # 뒤에있는 것중, 가장 최근
-            used_session = first_succeeding_schedule.used_session  # 현재 추가하는 스케줄의 사용된세션 = 가장 최근세션의 사용된세션
+            if succeeding_schedule.exists(): #현재 추가하는 스케줄보다 뒤에 스케줄이 있다면
+                first_succeeding_schedule = succeeding_schedule.latest('start') # 뒤에있는 것중, 가장 최근
+                used_session = first_succeeding_schedule.used_session  # 현재 추가하는 스케줄의 사용된세션 = 가장 최근세션의 사용된세션
 
-            for s in succeeding_schedule.order_by('start'): #시간에 따른 오림차순
-                s.used_session = s.used_session + 1 #빠른세션들 사용된세션을 +1
-                s.save()
+                for s in succeeding_schedule.order_by('start'): #시간에 따른 오림차순
+                    s.used_session = s.used_session + 1 #빠른세션들 사용된세션을 +1
+                    s.save()
 
 
-            if '예비' in title: #예비 버튼이라면
-                    member.used_session = member.used_session+0 #세션추가 없음
-            else:
-                member.used_session = member.used_session+1 #사용된 세션1회추가
+                if '예비' in title: #예비 버튼이라면
+                        member.used_session = member.used_session+0 #세션추가 없음
+                        unitprice= 0
+                else:
+                    member.used_session = member.used_session+1 #사용된 세션1회추가
+                    unitprice = member.PT_unitprice
 
-            member.save() # +1 상태 저장
+                member.save() # +1 상태 저장
 
-        else:  # 뒤에 스케줄이 없다면
-            if '예비' in title: #예비 버튼이라면
-                    member.used_session = member.used_session+0 #세션추가 없음
-            else:
-                member.used_session = member.used_session+1 #사용된 세션1회추가
+            else:  # 뒤에 스케줄이 없다면
+                if '예비' in title: #예비 버튼이라면
+                        member.used_session = member.used_session+0 #세션추가 없음
+                        unitprice= 0
+                else:
+                    member.used_session = member.used_session+1 #사용된 세션1회추가
+                    unitprice = member.PT_unitprice
 
-            member.save() # +1 상태 저장
+                member.save() # +1 상태 저장
 
-            used_session = member.used_session
+                used_session = member.used_session
 
-        Schedule.objects.create(
-            Trainer=request.user,
-            name = member,
-            title = title, #받아온 data중 title 얻기
-            start = start,
-            end = end,
-            birth= member.birth,
-            registered_date = member.registered_date,
-            used_session = used_session,
-            registered_session = member.registered_session,
-            )
-        context={
-            'used_session':member.used_session,
-        }
+            Schedule.objects.create(
+                Trainer=request.user,
+                name = member,
+                title = title, #받아온 data중 title 얻기
+                start = start,
+                end = end,
+                birth= member.birth,
+                registered_date = member.registered_date,
+                used_session = used_session,
+                registered_session = member.registered_session,
+                unitprice = unitprice #수수료 10%제외한 단가
+                )
+            context={
+                'used_session':member.used_session,
+            }
 
     else:
         context={
@@ -279,26 +469,26 @@ def schedule_add(request):
 
 def schedule_delete(request, schedule_id):
     schedule = Schedule.objects.get(id=schedule_id) #해당 스케줄찾기
-    member = schedule.name #해당 회원 찾기
-
-    succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(registered_date=schedule.registered_date).filter(start__gt=schedule.start).filter(~Q(title__icontains='예비')) #같은 회원권 스케줄중(예비가 아닌), 빠른 날짜가 있는지 찾는다. 큰쪽이 더 최신날짜
-
-    if succeeding_schedule.exists(): #현재 지우는 스케줄보다 뒤에 스케줄이 있다면
-        for s in succeeding_schedule.order_by('start'): #시간에 따른 오림차순
-            s.used_session = s.used_session - 1 #빠른세션들 사용된세션
-            s.save()
-
-    if '예비' in schedule.title : #예비 버튼이라면
-            member.used_session = member.used_session+0 #세션삭제 없음
+    if schedule.title == "GX":
+        schedule.delete()
     else:
-        member.used_session = member.used_session-1
-        #스케줄 삭제시 세션 횟수도 하나 삭제.
+        member = schedule.name #해당 회원 찾기
+
+        succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(registered_date=schedule.registered_date).filter(start__gt=schedule.start).filter(~Q(title__icontains='예비')) #같은 회원권 스케줄중(예비가 아닌), 빠른 날짜가 있는지 찾는다. 큰쪽이 더 최신날짜
+
+        if succeeding_schedule.exists(): #현재 지우는 스케줄보다 뒤에 스케줄이 있다면
+            for s in succeeding_schedule.order_by('start'): #시간에 따른 오림차순
+                s.used_session = s.used_session - 1 #빠른세션들 사용된세션
+                s.save()
+
+        if '예비' in schedule.title : #예비 버튼이라면
+                member.used_session = member.used_session+0 #세션삭제 없음
+        else:
+            member.used_session = member.used_session-1
+            #스케줄 삭제시 세션 횟수도 하나 삭제.
 
 
-    member.save() # +0 or -1 상태 저장
-    schedule.delete() #스케줄 삭제
+        member.save() # +0 or -1 상태 저장
+        schedule.delete() #스케줄 삭제
 
     return redirect('schedule')
-
-def sales(request):
-    return render(request, 'sales.html')
