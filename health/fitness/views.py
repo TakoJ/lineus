@@ -204,7 +204,6 @@ def PT_mypage(request): #피트니스의 마이페이지
 
     #팀원이면
     else:
-        print("팀장이 아닙니다.")
         last_commissions = Fitness_Personal_Commission.objects.filter(min_personal_sales__lte=lastmonth_members_pay).filter(max_personal_sales__gt=lastmonth_members_pay)
         this_commissions = Fitness_Personal_Commission.objects.filter(min_personal_sales__lte=thismonth_members_pay).filter(max_personal_sales__gt=thismonth_members_pay)
 
@@ -226,7 +225,6 @@ def PT_mypage(request): #피트니스의 마이페이지
         last_tuition = last_tuition + last_personal_tuition
 
     for s in thismonth_schedules:
-        print(s.unitprice)
         this_personal_tuition = s.unitprice * this_tuition_commission/100
         this_tuition = this_tuition + this_personal_tuition
 
@@ -263,6 +261,169 @@ def PT_mypage(request): #피트니스의 마이페이지
     }
 
     return render(request, 'PT_mypage.html', context)
+
+def Pilates_mypage(request):
+    PT_members = request.user.PT_members.all()
+    date = datetime.date.today() #오늘 받기
+    #####오늘#####
+    today_members = PT_members.filter(registered_date=date) #오늘 등록한 회원
+    today_members_pay = today_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
+    #####이번주####
+    start_week = date- datetime.timedelta(date.weekday()) #이번주(월요일시작)
+    end_week = start_week + datetime.timedelta(6) #월요일 + 6 (일요일)
+    this_month = datetime.timedelta(date.month)
+    thisweek_members = PT_members.filter(registered_date__range=[start_week, end_week])
+    thisweek_members_pay = thisweek_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
+    ####이번달####
+    this_month_start = datetime.datetime(date.year, date.month, 1) #이번달의 1일
+    thismonth_members = PT_members.filter(registered_date__range=[this_month_start, date])
+    thismonth_members_pay = thismonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if thismonth_members else 0
+
+    ###저번달
+    if date.month == 1: #1월이면, 작년 12월 return
+        year = date.year-1
+        last_month= 12
+    else:
+        year = date.year
+        last_month = date.month-1
+
+    lastmonth_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=last_month)
+    lastmonth_members_pay = lastmonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if lastmonth_members else 0
+    #####커미션##########
+    basic_salary = request.user.basic_salary
+    last_total=int(0)
+    last_tuition = int(0)
+    this_total=int(0)
+    this_tuition = int(0)
+
+    team_members = User.objects.filter(groups__name='Pilates') #필라테스 팀 직원들
+    lastmonth_PT_schedules = Schedule.objects.filter(Trainer=request.user).filter(start__year=year).filter(start__month=last_month).filter(GX=False) #지난달에 pt받은 회원들
+    thismonth_PT_schedules = Schedule.objects.filter(Trainer=request.user).filter(start__year=date.year).filter(start__month=date.month).filter(GX=False) #이번달에 pt받은 회원들
+
+    lastmonth_GX_schedules = Schedule.objects.filter(Trainer=request.user).filter(start__year=year).filter(start__month=last_month).filter(GX=True) #지난달 GX 갯수
+    thismonth_GX_schedules = Schedule.objects.filter(Trainer=request.user).filter(start__year=date.year).filter(start__month=date.month).filter(GX=True) #이번달 GX 갯수
+
+    for f in team_members:
+        PT_members = f.PT_members.all()
+        last_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=last_month) #지난달 등록한 Pilates PT회원들
+        last_members_pay = last_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if last_members else 0 #Suspect some of members is None
+        last_total = last_total + last_members_pay #저번달 팀 총 매출
+        this_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=date.month) #이번달 등록한 Pilates PT회원들
+        this_members_pay = this_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if this_members else 0 #Suspect some of members is None
+        this_total = this_total + this_members_pay # 이번달 팀 총 매출
+
+    #팀장이면
+    if request.user.teamleader == True:
+        last_PT_commission_rate = 0
+        this_PT_commission_rate = 0 #팀장은 PT비율로 안하니 0으로.
+        last_commissions = Pilates_Teamleader_Commission.objects.filter(min_sales__lte=last_total).filter(max_sales__gt=last_total)
+        this_commissions = Pilates_Teamleader_Commission.objects.filter(min_sales__lte=this_total).filter(max_sales__gt=this_total)
+
+        for c in last_commissions:
+            last_commission_rate = c.commission
+            last_GX_tuition = c.GX_tuition
+            last_PT_tuition = c.PT_tuition
+
+        for c in this_commissions:
+            this_commission_rate = c.commission
+            this_GX_tuition = c.GX_tuition
+            this_PT_tuition = c.PT_tuition
+
+        last_commission = float(last_total) * last_commission_rate/100
+        this_commission = float(this_total) * this_commission_rate/100
+
+        last_GX_commission = lastmonth_GX_schedules.count() * last_GX_tuition
+        last_PT_commission = lastmonth_PT_schedules.count() * last_PT_tuition
+
+        this_GX_commission = thismonth_GX_schedules.count() * this_GX_tuition
+        this_PT_commission = thismonth_PT_schedules.count() * this_PT_tuition
+
+
+    #팀원이면
+    else:
+        last_commission = int(0)
+        this_commission = int(0) #팀원은, 팀커미션 없으니 0으로.
+        last_commission_rate = 0
+        this_commission_rate = 0
+        if request.user.pilates_GX == 'basic': #고정된 GX수업비
+            for gx in Pilates_GX_Basic.objects.all(): #2만원인 gx 커미션정책 가져오기.
+                last_GX_commission = gx.tuition * lastmonth_GX_schedules.count()
+                this_GX_commission = gx.tuition * thismonth_GX_schedules.count()
+
+
+        else: #명수에 따른 GX수업비
+            last_GX_commission = int(0)
+            this_GX_commission = int(0)
+            for gx in Pilates_GX_DependingNum.objects.all():
+                min_num = gx.depending_number_min #1, 3, 5
+                max_num = gx.depending_number_max #2, 4, 7
+
+                last_GX = lastmonth_GX_schedules.filter(number__lte=max_num).filter(number__gte=min_num) #처음엔 1~2명, 다음엔 3~4명, 다음엔 5~6명
+
+                last_GX_commission = last_GX_commission + (last_GX.count() * gx.tuition)
+
+                this_GX = thismonth_GX_schedules.filter(number__lte=max_num).filter(number__gte=min_num) #처음엔 1~2명, 다음엔 3~4명, 다음엔 5~6명
+                this_GX_commission +=  (this_GX.count() * gx.tuition)
+
+        if request.user.pilates_PT == 'basic': #매출에 따른 PT수업료.
+            last_commissions = Pilates_Commission.objects.filter(min_personal_sales__lte=lastmonth_members_pay).filter(max_personal_sales__gt=lastmonth_members_pay)
+            this_commissions = Pilates_Commission.objects.filter(min_personal_sales__lte=thismonth_members_pay).filter(max_personal_sales__gt=thismonth_members_pay)
+
+            for c in last_commissions:
+                last_PT_commission_rate = c.tuition_commission
+
+            last_PT_commission = lastmonth_PT_schedules.count() * last_PT_commission_rate/100
+
+            for c in this_commissions:
+                this_PT_commission_rate = c.tuition_commission
+
+            this_PT_commission = thismonth_PT_schedules.count() * this_PT_commission_rate/100
+
+        else: #고정된 PT수업료 비율
+            for pt in Pilates_PT.objects.all():
+                last_PT_commission_rate = pt.fix_rate
+                this_PT_commission_rate = pt.fix_rate
+
+            last_PT_commission = float(lastmonth_members_pay) * last_PT_commission_rate/100
+            this_PT_commission = float(thismonth_members_pay) * this_PT_commission_rate/100
+
+    last_salary = int(request.user.basic_salary) + int(last_commission) + int(last_GX_commission) + int(last_PT_commission)
+    this_salary = int(request.user.basic_salary) + int(this_commission) + int(this_GX_commission) + int(this_PT_commission)
+
+    context={
+        'PT_members' : PT_members,
+        'today_members' : today_members,
+        'today_members_pay' : today_members_pay,
+        'thisweek_members' : thisweek_members,
+        'thisweek_members_pay' :thisweek_members_pay,
+        'thismonth_members' : thismonth_members,
+        'thismonth_members_pay' : thismonth_members_pay,
+        'basic_salary' :basic_salary,
+
+        'lastmonth_members_pay' :lastmonth_members_pay,
+        #지난달
+        'last_total' : last_total,
+        'last_commission' : last_commission,
+        'last_commission_rate' : last_commission_rate,
+        'last_GX_commission' : last_GX_commission,
+        'last_PT_commission' : last_PT_commission,
+        'lastmonth_GX_schedules' : lastmonth_GX_schedules.count(),
+        'lastmonth_PT_schedules' : lastmonth_PT_schedules.count(),
+        'last_PT_commission_rate' : last_PT_commission_rate,
+        'last_salary' : last_salary,
+        #이번달
+        'this_total' : this_total,
+        'this_commission' : this_commission,
+        'this_commission_rate' : this_commission_rate,
+        'this_GX_commission' : this_GX_commission,
+        'this_PT_commission' : this_PT_commission,
+        'thismonth_GX_schedules' :thismonth_GX_schedules.count(),
+        'thismonth_PT_schedules' : thismonth_PT_schedules.count(),
+        'this_PT_commission_rate' : this_PT_commission_rate,
+        'this_salary' : this_salary,
+
+    }
+    return render(request, 'Pilates_mypage.html', context)
 
 def schedule(request): #스케줄 관리 페이지
     schedules = request.user.schedule.all() #나의 스케줄
@@ -321,7 +482,7 @@ def PT_member_delete(request, PT_member_id):
         p.unitprice = None
         p.period_PT = None
         p.registered_date = None
-        p,re_registered = False
+        p.re_registered = False
         p.save()
     messages.info(request, 'PT회원이 삭제되었습니다.')
     return redirect('schedule')

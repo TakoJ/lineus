@@ -51,9 +51,12 @@
                 <li><a href="{% url 'register' %}">회원가입 폼</a></li>
                 <li><a href="{% url 'mypage' %}">FC의 나의 페이지</a></li>
                 {% else %}
-                <li><a href="{% url 'register' %}">회원가입 폼</a></li>
-                <li><a href="{% url 'management:commission_management' %}">커미션관리</a></li>
-                <li><a href="{% url 'PT_mypage' %}">PT의 나의 페이지</a></li>
+                    {% if request.user|has_group:"Fitness" %}
+                    <li><a href="{% url 'PT_mypage' %}">Fitness의 나의 페이지</a></li>
+                    {% else %}
+                    <li><a href="{% url 'Pilates_mypage' %}">Pilates의 나의 페이지</a></li>
+                    {% endif %}
+
                 <li><a href="{% url 'schedule' %}">스케줄 관리</a></li>
                 {% endif %}
              {% endif %}

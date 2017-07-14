@@ -15,3 +15,5 @@ class User(AbstractUser):
     phone_num = models.CharField(max_length=32, null=True, help_text='Ex) 010-1234-1234',verbose_name='휴대번호')
     teamleader = models.BooleanField(blank=True, default=False, verbose_name='팀장 여부')
     basic_salary = models.DecimalField(max_digits=10, decimal_places=0, default=0 ,verbose_name='기본급')
+    pilates_GX = models.CharField(max_length=32, blank=True, null=True, help_text='필라테스 gx정책',verbose_name='필라테스 GX정책')
+    pilates_PT = models.CharField(max_length=32, blank=True, null=True, help_text='필라테스 PT정책',verbose_name='필라테스 PT정책')

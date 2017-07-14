@@ -5,9 +5,10 @@ from django.shortcuts import render, redirect
 from django.db.models import Sum
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Group
+from management.models import FC_Teamleader_Commission, FC_Personal_Commission, FC_Team_Commission, Fitness_Teamledaer_Commission, Fitness_Personal_Commission, Pilates_Teamleader_Commission,  Pilates_Commission, Pilates_GX_Basic, Pilates_GX_DependingNum, Pilates_PT
 from authentication.models import User
 from staff.models import Member
-from management.forms import CustomUserChangeForm, EditForm
+from management.forms import CustomUserChangeForm, EditForm, FC_TeamLeader_EditForm
 import datetime
 import json
 
@@ -83,7 +84,55 @@ def staff_schedule(request, staff_id):
     return render(request, 'schedule.html', context)
 
 def commission_management(request):
-    return render(request, 'management/commission_management.html')
+    FC_Teamleader_Com = FC_Teamleader_Commission.objects.all()
+    FC_Personal_Com = FC_Personal_Commission.objects.all()
+    FC_Personal_Com_1 = FC_Personal_Com.filter(personnel=1)
+    FC_Personal_Com_2 = FC_Personal_Com.filter(personnel=2)
+    FC_Personal_Com_3 = FC_Personal_Com.filter(personnel=3)
+    FC_Team_Com = FC_Team_Commission.objects.all()
+    Fit_Teamledaer_Com = Fitness_Teamledaer_Commission.objects.all()
+    Fit_Personal_Com = Fitness_Personal_Commission.objects.all()
+    Pil_Teamleader_Com = Pilates_Teamleader_Commission.objects.all()
+    Pil_Com = Pilates_Commission.objects.all()
+    Pil_GX_Basic = Pilates_GX_Basic.objects.all()
+    Pil_GX_DependingNum = Pilates_GX_DependingNum.objects.all()
+    Pil_PT = Pilates_PT.objects.all()
+    context = {
+        'FC_Teamleader_Com' : FC_Teamleader_Com,
+        'FC_Personal_Com' : FC_Personal_Com,
+        'FC_Personal_Com_1' : FC_Personal_Com_1,
+        'FC_Personal_Com_2' : FC_Personal_Com_2,
+        'FC_Personal_Com_3' : FC_Personal_Com_3,
+        'FC_Team_Com' : FC_Team_Com,
+        'Fit_Teamledaer_Com' : Fit_Teamledaer_Com,
+        'Fit_Personal_Com' : Fit_Personal_Com,
+        'Pil_Teamleader_Com' : Pil_Teamleader_Com,
+        'Pil_Com' : Pil_Com,
+        'Pil_GX_Basic' : Pil_GX_Basic,
+        'Pil_GX_DependingNum' : Pil_GX_DependingNum,
+        'Pil_PT' : Pil_PT,
+    }
+
+    return render(request, 'management/commission_management.html', context)
+
+def edit_commission(request, fc_teamleader_id):
+    commission = FC_Teamleader_Commission.objects.get(id=fc_teamleader_id)
+
+    if request.method == 'POST':
+        form = FC_TeamLeader_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = FC_Teamleader_Commission.objects.get(id=fc_teamleader_id)
+        form = FC_TeamLeader_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
 
 def sales_management(request):
     staff_list = User.objects.all()

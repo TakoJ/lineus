@@ -8,7 +8,15 @@ class StaffRegisterForm(UserCreationForm): #usercreation inheritance
         ('M','남자'),
         ('F','여자'),
     ]
+    GX_CHOICES = [
+        ('basic','기본'), #수업당 2만원
+        ('depending_number','명수에 따라서')
+    ]
 
+    PT_CHOICES = [
+        ('basic','매출당'), #매출당 수업료받는게 기본이니까.
+        ('fix','고정된 비율') #현재 40%로 고정.
+    ]
     TEAM_CHOICES=[('FC','FC'),
                 ('Fitenss','Fitness'),
                 ('Pilates','Pilates')]
@@ -16,6 +24,8 @@ class StaffRegisterForm(UserCreationForm): #usercreation inheritance
     email = forms.EmailField()
     team = forms.ChoiceField(choices=TEAM_CHOICES, widget=forms.RadioSelect())
     teamleader = forms.BooleanField(required=False) #팀장여부
+    pilates_GX = forms.ChoiceField(choices=GX_CHOICES, widget=forms.RadioSelect())
+    pilates_PT = forms.ChoiceField(choices=PT_CHOICES, widget=forms.RadioSelect())
 
     class Meta:
         model = User
@@ -27,6 +37,8 @@ class StaffRegisterForm(UserCreationForm): #usercreation inheritance
             'phone_num',
             'team',
             'teamleader',
+            'pilates_GX',
+            'pilates_PT',
             'basic_salary')
 
     def save(self, commit=True):

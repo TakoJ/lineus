@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^schedule_management/$', views.schedule_management, name='schedule_management'),
     url(r'^schedule_management/staff_schedule/(?P<staff_id>\d+)', views.staff_schedule, name="staff_schedule"),
     url(r'^commission_management/$', views.commission_management, name='commission_management'),
+    url(r'^commission_management/edit_commission/(?P<fc_teamleader_id>\d+)/$', views.edit_commission, name='edit_commission'),
     url(r'^sales_management/$', views.sales_management, name='sales_management'),
     url(r'^set_today/$', views.set_today, name='set_today'),
     url(r'^sales_search/$', views.sales_search, name='sales_search'),
