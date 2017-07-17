@@ -22,7 +22,7 @@
                 <th>삭제</th>
             </tr>
             {% load el_pagination_tags %}
-            {% paginate 2 member_list %} <!-- 한페이지에 3개씩 표현 -->
+            {% paginate 10 member_list %} <!-- 한페이지에 10개씩 표현 -->
             {% for member in member_list %}
             <tr>
                 <td><a href="{% url "management:edit_member" member.id %}">{{ member }}</a></td>
@@ -69,15 +69,19 @@
                 <th>이름</th>
                 <th>생년월일</th>
                 <th>팀</th>
+                <th>My Page</th>
+                <th>매출</th>
                 <th>삭제</th>
             </tr>
 
-            {% paginate 3 staff_list using "other_entries_page" %} <!-- 한페이지에 3개씩 표현 -->
+            {% paginate 10 staff_list using "other_entries_page" %} <!-- 한페이지에 10개씩 표현 -->
             {% for staff in staff_list %}
             <tr>
                 <td><a href="{% url "management:edit_staff" staff.id %}">{{ staff }}</a></td>
                 <td>{{ staff.birth }}</td>
                 <td>{{ staff.groups.all.0 }}</td>
+                <td><a href="{% url "management:staff_mypage" staff.id %}">My Page</a></td>
+                <td><a href="{% url "management:staff_sales" staff.id %}">매출</a></td>
                 <td><a class="btn btn-default" data-toggle="modal" data-target="#{{staff.id}}">삭제</a></td>
             </tr>
 

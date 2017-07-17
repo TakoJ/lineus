@@ -6,7 +6,7 @@ from django.db.models import Sum
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Group
 from management.models import FC_Teamleader_Commission, FC_Personal_Commission, FC_Team_Commission, Fitness_Teamledaer_Commission, Fitness_Personal_Commission, Pilates_Teamleader_Commission,  Pilates_Commission, Pilates_GX_Basic, Pilates_GX_DependingNum, Pilates_PT
-from authentication.models import User
+from authentication.models import User,FC_Salary, Fitness_Salary,Pilates_Salary
 from staff.models import Member
 from management.forms import CustomUserChangeForm, EditForm, FC_TeamLeader_EditForm
 import datetime
@@ -23,6 +23,20 @@ def member_management(request):
     }
     return render(request, 'management/member_management.html', context)
 
+def staff_mypage(request, staff_id):
+    staff = User.objects.get(id=staff_id)
+    if staff.groups.filter(name__in=['FC']).exists():
+        return redirect('mypage', staff_id=staff_id)
+
+    elif staff.groups.filter(name__in=['Fitness']).exists():
+        return redirect('PT_mypage', staff_id=staff_id)
+
+    elif staff.groups.filter(name__in=['Pilates']).exists():
+        return redirect('Pilates_mypage', staff_id=staff_id)
+    else:
+        return redirect('PT_mypage', staff_id=staff_id)
+
+
 def edit_member(request, member_id):
     member = Member.objects.get(id=member_id)
 
@@ -37,6 +51,7 @@ def edit_member(request, member_id):
 
 def edit_staff(request, staff_id):
     staff = User.objects.get(id=staff_id)
+    salary = Fitness_Salary.objects.filter(uid=staff_id)
 
     if request.method == 'POST':
         form = CustomUserChangeForm(request.POST, instance=staff)
@@ -50,8 +65,29 @@ def edit_staff(request, staff_id):
 
     context = {
         'form' : form,
+        'salary' : salary,
     }
     return render(request, 'management/edit_staff.html', context)
+
+def staff_sales(request, staff_id):
+    staff = User.objects.get(id=staff_id)
+    if staff.groups.filter(name__in=['FC']).exists():
+        salary = FC_Salary.objects.filter(uid=staff_id)
+
+    elif staff.groups.filter(name__in=['Fitness']).exists():
+        salary = Fitness_Salary.objects.filter(uid=staff_id)
+
+    elif staff.groups.filter(name__in=['Pilates']).exists():
+        salary = Pilates_Salary.objects.filter(uid=staff_id)
+    else:
+        pass
+
+    context = {
+        'staff' : staff,
+        'salary' : salary,
+    }
+    return render(request, 'management/staff_sales.html', context)
+
 
 def delete_member(request, member_id):
     member = Member.objects.get(id=member_id)

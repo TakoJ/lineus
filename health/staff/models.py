@@ -95,6 +95,18 @@ class Member(models.Model):
     def PT_unitprice(self):
         return int(self.unitprice * 10/11) #소수점없이 반환
 
+class PaymentHistory(models.Model):
+    user = models.ForeignKey(Member, null=True, verbose_name='회원', related_name='PaymentHistory') #Member
+    uid = models.IntegerField(null=True) #user의 id도 가져오자.
+    date = models.DateField(verbose_name='결제일')
+    end_date = models.DateField(default=(datetime.now() + timedelta(days=30)), verbose_name='회원권종료일')
+    payment_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='결제금액')
+    status = models.IntegerField(default=1) #1이면 활성, 0면 비활성. end_date와 today비교해서 비활성. 환불시 2
+
+class RefundHistory(models.Model):
+    payment = models.OneToOneField(PaymentHistory)
+    refund_date = models.DateField(verbose_name='환불일')
+    refund_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='환불금액')
 
 class History(models.Model):
     user = models.ForeignKey(Member, max_length=12, verbose_name='성명', related_name='History') #ForeignKey로 하면 def __str__에서 오류 난다.

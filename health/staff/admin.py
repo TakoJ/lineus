@@ -1,5 +1,5 @@
 from django.contrib import admin
-from staff.models import Member, History, Schedule
+from staff.models import Member, History, Schedule, PaymentHistory, RefundHistory
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.admin import UserAdmin
 from django import forms
@@ -31,6 +31,14 @@ class HistoryAdmin(admin.ModelAdmin):
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ['Trainer','title','start']
     search_fields = ['title','start']
+
+@admin.register(PaymentHistory)
+class PaymentHistoryAdmin(admin.ModelAdmin):
+    list_display = ['user','uid','date','end_date','payment_amount']
+
+@admin.register(RefundHistory)
+class RefundHistoryAdmin(admin.ModelAdmin):
+    list_display = ['payment','refund_date','refund_amount']
 
 
 # admin.site.unregister(User)

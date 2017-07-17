@@ -12,4 +12,8 @@ urlpatterns = [
         'next_page': 'home.html',
         }),
     url(r'^staff_register/$', views.staff_register, name='staff_register'),
+    url(r'^fc_salary_save/$', views.fc_salary_save, name='fc_salary_save'),
+    url(r'^fitness_salary_save/$', views.fitness_salary_save, name='fitness_salary_save'),
+    url(r'^pilates_salary_save/$', views.pilates_salary_save, name='pilates_salary_save'),
+
 ]

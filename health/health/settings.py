@@ -32,7 +32,6 @@ ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
-    'admin_menu', #pip install django-admin-menu
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

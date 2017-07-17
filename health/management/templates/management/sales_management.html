@@ -6,10 +6,10 @@
 <div class="col-xs-8 col-xs-offset-2 text-center">
     <form id="sales_search" action="{% url 'management:sales_search' %}" method="GET">
         <select title="team_choice" name="team_choice" class="select my-control" id="team_choice">
-            <option name='FC' value="FC" {% if team == 'FC' %} selected {% endif %}>FC</option>
-            <option name='Fitness' value="Fitness" {% if team == 'FC' %} selected {% endif %}>피트니스</option>
-            <option name='Pilates' value="Pilates" {% if team == 'FC' %} selected {% endif %}>필라테스</option>
             <option name='All' value="All" {% if team == 'All' %} selected {% endif %}>전체</option>
+            <option name='FC' value="FC" {% if team == 'FC' %} selected {% endif %}>FC</option>
+            <option name='Fitness' value="Fitness" {% if team == 'Fitness' %} selected {% endif %}>피트니스</option>
+            <option name='Pilates' value="Pilates" {% if team == 'Pilates' %} selected {% endif %}>필라테스</option>
         </select>
         <!-- class="datepicker해도 됨." -->
         <span><input type="date" class="startdate my-control" name="startdate" value="{{ startdate }}" ></span>
@@ -20,11 +20,10 @@
 
     <hr/>
 
+
+    <h3>총합 : {{total |intcomma}}원</h3>
+
     <table class="table table-bordered" style="border:1px solid black;">
-        <tr>
-            <th>총합</th>
-            <th>{{total |intcomma}}원</th>
-        </tr>
         {% if lists %}
         <tr style="color:#c9b9a9;">
             <th>이름</th>
@@ -39,7 +38,7 @@
 
         {% else %}  <!-- 전체를 클릭했을 시-->
         <tr>
-            <th>팀</th>
+            <th>팀명</th>
             <td>이름</td>
             <td>매출</td>
         </tr>
@@ -85,13 +84,9 @@
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
-<!-- <script>
-$(document).ready(function() {
-    $('.datepicker').datepicker();
-});
-</script> -->
+
 <script type="text/javascript">
-    //당선택 버튼 처리
+    //날짜 버튼 처리
     $('#today').click(function(){
 
         $.ajax({

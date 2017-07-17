@@ -27,7 +27,7 @@
 
 
 <!-- <script type="text/javascript" src="{% static 'js/jquery-1.10.2.js' %}"></script> -->
-<script type="text/javascript" src="{% static 'js/fullcalendar.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/fullcalendar.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
     <title>건강과 땀</title>
 </head>
@@ -40,7 +40,6 @@
     <ul class="nav nav-tabs navbar-right">
 {% load user_tags %}
         {% if user.is_authenticated %}
-        <li><a href="{% url 'authentication:logout' %}?next={% url 'home' %}">로그아웃</a></li>
             {% if request.user.is_superuser %}
             <li><a href="{% url 'management:member_management' %}">회원 관리</a></li>
             <li><a href="{% url 'management:schedule_management' %}">스케줄 관리</a></li>
@@ -49,17 +48,17 @@
             {% else %}
                 {% if request.user|has_group:"FC" %}
                 <li><a href="{% url 'register' %}">회원가입 폼</a></li>
-                <li><a href="{% url 'mypage' %}">FC의 나의 페이지</a></li>
+                <li><a href="{% url 'mypage' user.id  %}">FC의 나의 페이지</a></li>
                 {% else %}
+                    <li><a href="{% url 'schedule' %}">스케줄 관리</a></li>
                     {% if request.user|has_group:"Fitness" %}
-                    <li><a href="{% url 'PT_mypage' %}">Fitness의 나의 페이지</a></li>
+                    <li><a href="{% url 'PT_mypage' user.id  %}">Fitness의 나의 페이지</a></li>
                     {% else %}
-                    <li><a href="{% url 'Pilates_mypage' %}">Pilates의 나의 페이지</a></li>
+                    <li><a href="{% url 'Pilates_mypage' user.id %}">Pilates의 나의 페이지</a></li>
                     {% endif %}
-
-                <li><a href="{% url 'schedule' %}">스케줄 관리</a></li>
                 {% endif %}
              {% endif %}
+         <li><a href="{% url 'authentication:logout' %}?next={% url 'home' %}">로그아웃</a></li>
         {% else %}
         <li><a href="{% url 'authentication:login' %}">로그인</a></li>
         {% endif %}
