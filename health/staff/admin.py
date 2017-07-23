@@ -15,7 +15,7 @@ class ScheduleInline(admin.TabularInline):
 
 @admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name','birth','sex']
+    list_display = ['id', 'name','birth','sex', 'registered_date']
     search_fields = ['name']
     inlines = [
         HistoryInline,
@@ -34,7 +34,7 @@ class ScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(PaymentHistory)
 class PaymentHistoryAdmin(admin.ModelAdmin):
-    list_display = ['user','uid','date','end_date','payment_amount']
+    list_display = ['user','uid','division','date','end_date','payment_amount']
 
 @admin.register(RefundHistory)
 class RefundHistoryAdmin(admin.ModelAdmin):

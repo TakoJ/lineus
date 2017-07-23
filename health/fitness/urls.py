@@ -4,6 +4,10 @@ from fitness import views
 urlpatterns= [
     url(r'^$', views.home, name='home'),
     url(r'^register/$', views.register, name='register'),
+    url(r'^date_add/$', views.date_add, name='date_add'),
+    url(r'^member_list/$', views.member_list, name='member_list'),
+    url(r'^member_list/member_search/$', views.member_search, name='member_search'),
+    url(r'^member_detail/(?P<member_id>\d+)/$', views.member_detail, name='member_detail'),
     url(r'^mypage/(?P<staff_id>\d+)/$', views.mypage, name='mypage'),
     url(r'^PT_mypage/(?P<staff_id>\d+)/$', views.PT_mypage, name='PT_mypage'),
     url(r'^Pilates_mypage/(?P<staff_id>\d+)/$', views.Pilates_mypage, name='Pilates_mypage'),

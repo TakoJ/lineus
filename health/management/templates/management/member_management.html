@@ -19,20 +19,22 @@
                 <th>이름</th>
                 <th>성별</th>
                 <th>생년월일</th>
+                <th>결제내역</th>
                 <th>삭제</th>
             </tr>
             {% load el_pagination_tags %}
-            {% paginate 10 member_list %} <!-- 한페이지에 10개씩 표현 -->
+            {% paginate 20 member_list %} <!-- 한페이지에 20개씩 표현 -->
             {% for member in member_list %}
             <tr>
                 <td><a href="{% url "management:edit_member" member.id %}">{{ member }}</a></td>
                 <td>{{ member.sex }}</td>
                 <td>{{ member.birth }}</td>
-                <td><a class="btn btn-default" data-toggle="modal" data-target="#{{member.id}}">삭제</a></td>
+                <td><a href="{%url "management:payment_history" member.id %}">결제내역</a></td>
+                <td><a class="btn btn-default" data-toggle="modal" data-target="#delete{{member.id}}">삭제</a></td>
             </tr>
 
             <!-- Modal -->
-            <div class="modal fade" id="{{member.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal fade" id="delete{{member.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
                   <div class="modal-header">

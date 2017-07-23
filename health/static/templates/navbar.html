@@ -47,6 +47,7 @@
             <li><a href="{% url 'management:sales_management' %}">매출 관리</a></li>
             {% else %}
                 {% if request.user|has_group:"FC" %}
+                <li><a href="{% url 'member_list' %}">회원 목록</a></li>
                 <li><a href="{% url 'register' %}">회원가입 폼</a></li>
                 <li><a href="{% url 'mypage' user.id  %}">FC의 나의 페이지</a></li>
                 {% else %}

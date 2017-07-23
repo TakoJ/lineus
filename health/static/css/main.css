@@ -106,3 +106,8 @@ a, a:hover, a:active, a:focus, button:focus {
 .table th{
     text-align: center;
 }
+
+.btn-whatever{
+    background-color: gray;
+    color:white;
+}

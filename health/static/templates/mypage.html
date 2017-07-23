@@ -10,19 +10,19 @@
 
 <div class="btn btn-default">오늘</div>
 {{today_members.count}}명
-<span>{{today_members_pay}}원</span>
+<span>{{today_members_pay |intcomma}}원</span>
 
 
 <div class="btn btn-default">이번주</div>
 {{thisweek_members.count}}명
-<span>{{thisweek_members_pay}}원</span>
+<span>{{thisweek_members_pay |intcomma}}원</span>
 
 <div class="btn btn-default">이번달</div>
 <span>{{thismonth_members.count}}명</span>
-<span>{{thismonth_members_pay}}원</span>
+<span>{{thismonth_members_pay_before |intcomma}}원</span>
 
 {% if request.user.is_superuser %}
-<a class="btn btn-danger" data-toggle="modal" data-target="#save" style="float:right;">지난 달 저장</a>
+<div><a class="btn btn-whatever" data-toggle="modal" data-target="#save" style="float:right;">지난 달 저장</a></div>
 {% else %}
 {% endif %}
 
@@ -30,12 +30,22 @@
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-success">지난달 FC팀 총 매출</a>
-<p><span class="team_sales">{{ last_team_sales|intcomma }}</span>원</p>
+<p><span class="team_sales">{{ last_team_sales_before|intcomma }}</span>원</p>
 </div>
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-success">지난달 나의 총 매출</a>
 <p><span class="personal_sales">{{ lastmonth_members_pay |intcomma }}</span>원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">지난달 FC팀 환불</a>
+<p><span class="last_FC_refund_amount">{{ last_FC_refund_amount|intcomma }}</span>원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">지난달 나의 회원 환불</a>
+<p><span class="last_personal_refund">{{ last_personal_refund|intcomma }}</span>원</p>
 </div>
 
 <hr/>
@@ -47,7 +57,7 @@
 
 
 <div class="text-center" style="display: inline-block;">
-<a class="btn btn-warning">지난달 커미션</a>
+<a class="btn btn-warning">지난달 팀 커미션</a>
 <p>(<span class="commission_rate">{{ last_commission_rate }}</span>%) / <span class="commission">{{ last_commission |intcomma}}</span>원</p>
 </div>
 {% if staff.teamleader %} <!-- 팀장이면 팀 수당만 있음. -->
@@ -62,15 +72,10 @@
 {% endif %}
 
 
-<div class="text-center" style="display: inline-block;">
+<!-- <div class="text-center" style="display: inline-block;">
 <a class="btn btn-warning">지난달 합계</a>
 <p><span class="total">{{ last_total |intcomma}}</span>원</p>
-</div>
-
-<div class="text-center" style="display: inline-block;">
-<a class="btn btn-warning">지난달 환불</a>
-<p><span class="refund">0</span>원</p>
-</div>
+</div> -->
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-warning">지난달 월급</a>
@@ -81,7 +86,22 @@
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-success">이번달 FC팀 총 매출</a>
-<p>{{ this_team_sales|intcomma }}원</p>
+<p>{{ this_team_sales_before|intcomma }}원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-success">이번달 나의 총 매출</a>
+<p>{{ thismonth_members_pay_before|intcomma }}원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 FC팀 환불</a>
+<p>{{ this_FC_refund_amount|intcomma }}원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 나의 회원 환불</a>
+<p>{{ this_personal_refund|intcomma }}원</p>
 </div>
 
 <hr/>
@@ -92,7 +112,7 @@
 </div>
 
 <div class="text-center" style="display: inline-block;">
-<a class="btn btn-primary">이번달 커미션</a>
+<a class="btn btn-primary">이번달 팀 커미션</a>
 <p>({{ this_commission_rate }}% ) / {{ this_commission |intcomma}}원</p>
 </div>
 
@@ -106,15 +126,11 @@
 {% endif %}
 
 
-<div class="text-center" style="display: inline-block;">
+<!-- <div class="text-center" style="display: inline-block;">
 <a class="btn btn-primary">이번달 합계</a>
 <p>{{ this_total |intcomma}}원</p>
-</div>
+</div> -->
 
-<div class="text-center" style="display: inline-block;">
-<a class="btn btn-primary">이번달 환불</a>
-<p>0원</p>
-</div>
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-primary">이번달 월급</a>
@@ -124,21 +140,26 @@
 <hr/>
 <table class="table table-bordered">
     <tr>
+        <th colspan="4">이번달 환불</th>
+    </tr>
+    <tr>
         <th>이름</th>
+        <th>결제일</th>
         <th>환불일</th>
         <th>환불액</th>
-        <th>삭감 커미션</th>
     </tr>
+    {% for refund in this_refund_list %}
     <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td>{{refund.payment }}</td>
+        <td>{{ refund.date }}</td>
+        <td>{{refund.refund_date}}</td>
+        <td>{{refund.refund_amount |intcomma}}원</td>
     </tr>
+    {% endfor %}
     <tr>
-    <th colspan="3">환불 총합</th>
-    <td>0원</td>
-    </tr>
+        <th colspan="3">환불 총합 </th>
+        <td>{{ this_personal_refund |intcomma}}원</td>
+    <tr>
 </table>
 
 </div>
@@ -178,15 +199,15 @@
         id = {{staff.id}}
         team_sales = $('.team_sales').text();
         personal_sales = $('.personal_sales').text();
+        FC_refund = $('.last_FC_refund_amount').text();
+        personal_refund = $('.last_personal_refund').text();
         basic_salary = $('.basic_salary').text();
         commission_rate = $('.commission_rate').text();
         commission = $('.commission').text();
 
-        total = $('.total').text();
-        refund = $('.refund').text();
         salary = $('.salary').text();
 
-        var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "id":id, 'team_sales':team_sales, 'personal_sales':personal_sales, 'basic_salary':basic_salary, 'commission_rate':commission_rate, 'commission':commission, 'personal_commission_rate':personal_commission_rate,'personal_commission':personal_commission, 'total':total, 'refund':refund, 'salary':salary};
+        var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "id":id, 'team_sales':team_sales, 'personal_sales':personal_sales, 'FC_refund':FC_refund, 'personal_refund':personal_refund, 'basic_salary':basic_salary, 'commission_rate':commission_rate, 'commission':commission, 'personal_commission_rate':personal_commission_rate,'personal_commission':personal_commission,'salary':salary};
         $.ajax({
             url: "{% url 'authentication:fc_salary_save' %}",
             type: "POST",

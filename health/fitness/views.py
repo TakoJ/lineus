@@ -8,8 +8,9 @@ from django.db.models import Q
 from .models import *
 from staff.models import *
 from management.models import *
-from authentication.models import User
-from staff.forms import RegisterForm,PT_RegisterForm,PT_Register_HistoryForm,Schedule_AddForm
+from authentication.models import User, FC_Salary
+from staff.forms import RegisterForm,PT_RegisterForm,PT_Register_HistoryForm
+from management.forms import EditForm
 from datetime import timedelta
 import datetime
 import json
@@ -20,6 +21,7 @@ def home(request):
     return render(request, 'home.html')
 
 def register(request):
+    today = datetime.date.today() #오늘 받기
     # 받아온 데이터를 통해 레지스터폼 인스턴스 생성
     if request.method == 'POST':
         form = RegisterForm(request.POST or None)
@@ -27,6 +29,15 @@ def register(request):
             instance =form.save(commit=False)
             instance.staff=request.user #staff를 현재 유저로 저장한 뒤
             instance.save() #회원가입 저장
+
+            PaymentHistory.objects.create(
+                user = instance,
+                division = 'Membership',
+                date = instance.registered_date,
+                start_date = instance.start_date,
+                end_date = instance.end_date,
+                payment_amount = instance.payment_amount
+            )
 
             messages.info(request, '회원가입이 되었습니다.')
             return render(request,'home.html') #완료후 홈 페이지로 로딩
@@ -36,25 +47,78 @@ def register(request):
 
     return render(request, 'register.html', {
         'form': form,
+        'today' : str(today),
         })
 
+def date_add(request):
+    if request.is_ajax():
+        start_date = request.POST.get('start_date',None)
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+        d = int(request.POST.get('day',None))
+        days = timedelta(days=d);
+        end_date = start_date + days;
+        context={
+                'end_date':str(end_date),
+            }
+
+    else:
+        context={
+
+        }
+    return HttpResponse(json.dumps(context), content_type='application/json')
+
+
+def member_list(request):
+    members = Member.objects.all()
+    context = {
+        'members' : members,
+    }
+    return render(request, 'member_list.html', context)
+
+
+def member_search(request):
+
+    keyword = request.GET.get('q','') #검색 키워드
+
+    condition=(Q(name__icontains=keyword) | Q(phone_num__icontains=keyword))
+
+    search_member = Member.objects.filter(condition)#검색 조건 이름, 휴대번호
+
+    context= {
+        'search_member' : search_member,
+        'q' : keyword,
+    }
+    return render(request, 'member_search.html', context)
+
+def member_detail(request, member_id):
+    member = Member.objects.get(id=member_id)
+    form = EditForm(request.POST or None, instance=member)
+    context = {
+        'member' : member,
+        'form' : form,
+    }
+    return render(request, 'member_detail.html', context)
+
 def mypage(request, staff_id): # FC팀의 마이페이지
+    thismonth_members_num = int(0)
+    thismonth_members_pay = int(0)
     staff = User.objects.get(id=staff_id)
     members = staff.members.all() #member의 staff의 related_name='members'
     date = datetime.date.today() #오늘 받기
     #####오늘#####
-    today_members = members.filter(start_date=date) #오늘 등록한 회원
+    today_members = members.filter(registered_date=date) #오늘 등록한 회원
     today_members_pay = today_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     #####이번주####
     start_week = date- datetime.timedelta(date.weekday()) #이번주(월요일시작)
     end_week = start_week + datetime.timedelta(6) #월요일 + 6 (일요일)
     this_month = datetime.timedelta(date.month)
-    thisweek_members = members.filter(start_date__range=[start_week, end_week])
+    thisweek_members = members.filter(registered_date__range=[start_week, end_week])
     thisweek_members_pay = thisweek_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     ####이번달####
     this_month_start = datetime.datetime(date.year, date.month, 1)
-    thismonth_members = members.filter(start_date__range=[this_month_start, date])
+    thismonth_members = members.filter(registered_date__range=[this_month_start, date])
     thismonth_members_pay = thismonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if thismonth_members else 0
+
     ###저번달
     if date.month == 1: #1월이면, 작년 12월 return
         year = date.year-1
@@ -63,23 +127,86 @@ def mypage(request, staff_id): # FC팀의 마이페이지
         year = date.year
         last_month = date.month-1
 
-    lastmonth_members = members.filter(start_date__year=year).filter(start_date__month=last_month)
+    lastmonth_members = members.filter(registered_date__year=year).filter(registered_date__month=last_month)
     lastmonth_members_pay = lastmonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if lastmonth_members else 0
     ########커미션#########
-    last_team_sales = int(0)
-    this_team_sales = int(0)
+    last_team_sales_before = int(0)
+    this_team_sales_before = int(0)
     basic_salary = staff.basic_salary
     team_members = User.objects.filter(groups__name='FC') #FC 팀 직원들
 
     for f in team_members:
         members = f.members.all()
-        last_members = members.filter(start_date__year=year).filter(start_date__month=last_month) #지난달 등록한 회원들
+        last_members = members.filter(registered_date__year=year).filter(registered_date__month=last_month) #지난달 등록한 회원들
         members_pay = last_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if last_members else 0 #Suspect some of members is None
-        last_team_sales = last_team_sales + members_pay #저번달 팀 총 매출
+        last_team_sales_before = last_team_sales_before + members_pay #저번달 팀 총 매출
 
-        this_members = members.filter(start_date__year=year).filter(start_date__month=date.month) #이번달 등록한 회원들
+        this_members = members.filter(registered_date__year=year).filter(registered_date__month=date.month) #이번달 등록한 회원들
         this_members_pay = this_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if this_members else 0 #Suspect some of members is None
-        this_team_sales = this_team_sales + this_members_pay # 이번달 팀 총 매출
+        this_team_sales_before = this_team_sales_before + this_members_pay # 이번달 팀 총 매출
+
+
+
+    ######################환불############
+
+    last_refund_list = RefundHistory.objects.none()
+    this_refund_list = RefundHistory.objects.none()
+    for m in staff.members.all(): #나의 회원만.
+        payment = m.PaymentHistory.filter(division="Membership")
+        for p in payment:
+            try:
+                last_refund = RefundHistory.objects.filter(payment=p).filter(refund_date__year=year).filter(refund_date__month=last_month)
+                last_refund_list |= last_refund
+
+                this_refund = RefundHistory.objects.filter(payment=p).filter(refund_date__range=[this_month_start, date])
+                this_refund_list |= this_refund
+            except:
+                pass
+    last_refund_list = last_refund_list.distinct()
+    this_refund_list = this_refund_list.distinct()
+
+    last_personal_refund = int(0)
+    for i in last_refund_list:
+        last_personal_refund = last_personal_refund + i.refund_amount #지난달 나의 회원 총 환불.
+
+    this_personal_refund = int(0)
+    for i in this_refund_list:
+        this_personal_refund = this_personal_refund + i.refund_amount #이번달 나의 회원 총 환불.
+
+    last_FC_refund = RefundHistory.objects.filter(division="Membership").filter(refund_date__year=year).filter(refund_date__month=last_month)  #지난달 회원권 총 환불.
+
+    last_FC_refund_amount = last_FC_refund.aggregate(Sum('refund_amount')).get('refund_amount__sum',0.00) if last_FC_refund else 0 #Suspect some of members
+
+    this_FC_refund = RefundHistory.objects.filter(division="Membership").filter(refund_date__range=[this_month_start, date]) #이번달 회원권 총 환불.
+
+    this_FC_refund_amount = this_FC_refund.aggregate(Sum('refund_amount')).get('refund_amount__sum',0.00) if this_FC_refund else 0 #Suspect some of members
+
+    #######환불End####################
+    #
+    ######총매출 - 환불##############
+    #지난달
+    last_team_sales = last_team_sales_before - last_FC_refund_amount
+    if last_team_sales <0:
+        last_team_sales=0
+
+    lastmonth_members_pay_before = lastmonth_members_pay
+    lastmonth_members_pay = lastmonth_members_pay_before - last_personal_refund
+    if lastmonth_members_pay < 0:
+        lastmonth_members_pay=0
+
+    ## 이번달 FC팀 총 매출 - 이번달 FC팀 환불
+    this_team_sales = this_team_sales_before - this_FC_refund_amount
+    if this_team_sales < 0 :
+        this_team_sales =0
+
+    # 이번달 나의 총 매출 - 이번달 나의 환불
+    thismonth_members_pay_before = thismonth_members_pay
+    thismonth_members_pay = thismonth_members_pay_before - this_personal_refund
+    # print(thismonth_members_pay)
+    if thismonth_members_pay < 0:
+        thismonth_members_pay = 0
+
+    ######총매출 - 환불 End###########
 
     #팀장이면
     if staff.teamleader == True:
@@ -89,7 +216,7 @@ def mypage(request, staff_id): # FC팀의 마이페이지
         last_personal_commission_rate = float(0)
         last_personal_commission = float(0)
         this_personal_commission_rate = float(0)
-        this_personal_commission = float(0  )
+        this_personal_commission = float(0)
 
      #팀원이면
     else:
@@ -120,8 +247,9 @@ def mypage(request, staff_id): # FC팀의 마이페이지
 
     this_commission = float(this_team_sales) * this_commission_rate/100
 
-    last_total = int(staff.basic_salary) + int(last_commission)
-    this_total = int(staff.basic_salary) + int(this_commission)
+    last_total = int(staff.basic_salary) + int(last_commission) + int(last_personal_commission)
+    this_total = int(staff.basic_salary) + int(this_commission) + int(this_personal_commission)
+
 
     context={
         'staff' : staff,
@@ -131,15 +259,16 @@ def mypage(request, staff_id): # FC팀의 마이페이지
         'thisweek_members' : thisweek_members,
         'thisweek_members_pay' :thisweek_members_pay,
         'thismonth_members' : thismonth_members,
-        'thismonth_members_pay' : thismonth_members_pay,
+        'thismonth_members_pay_before' : thismonth_members_pay_before,
         'lastmonth_members_pay' : lastmonth_members_pay,
         #커미션#
         'basic_salary' : basic_salary,
-        'last_team_sales' : last_team_sales,
+        'last_team_sales_before' : last_team_sales_before,
         'last_commission_rate' : last_commission_rate,
         'last_commission' : last_commission,
         'last_total' : last_total,
         #이번달 커미션#
+        'this_team_sales_before' : this_team_sales_before,
         'this_team_sales' : this_team_sales,
         'this_commission_rate': this_commission_rate,
         'this_commission' : this_commission,
@@ -149,6 +278,14 @@ def mypage(request, staff_id): # FC팀의 마이페이지
         'last_personal_commission' : last_personal_commission,
         'this_personal_commission_rate' : this_personal_commission_rate,
         'this_personal_commission' : this_personal_commission,
+        ###환불
+        'this_refund_list' : this_refund_list,
+        'last_personal_refund' : last_personal_refund,
+        'last_FC_refund' : last_FC_refund,
+        'last_FC_refund_amount' : last_FC_refund_amount,
+        'this_personal_refund' : this_personal_refund,
+        'this_FC_refund' : this_FC_refund,
+        'this_FC_refund_amount' : this_FC_refund_amount,
     }
     return render(request, 'mypage.html', context)
 
@@ -157,18 +294,22 @@ def PT_mypage(request, staff_id): #피트니스의 마이페이지
     PT_members = staff.PT_members.all()
     date = datetime.date.today() #오늘 받기
     #####오늘#####
-    today_members = PT_members.filter(registered_date=date) #오늘 등록한 회원
+    today_members = PT_members.filter(PT_registered_date=date) #오늘 등록한 회원
     today_members_pay = today_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
     #####이번주####
     start_week = date- datetime.timedelta(date.weekday()) #이번주(월요일시작)
     end_week = start_week + datetime.timedelta(6) #월요일 + 6 (일요일)
     this_month = datetime.timedelta(date.month)
-    thisweek_members = PT_members.filter(registered_date__range=[start_week, end_week])
+    thisweek_members = PT_members.filter(PT_registered_date__range=[start_week, end_week])
     thisweek_members_pay = thisweek_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
+    print(thisweek_members)
+    print(thisweek_members_pay)
     ####이번달####
     this_month_start = datetime.datetime(date.year, date.month, 1) #이번달의 1일
-    thismonth_members = PT_members.filter(registered_date__range=[this_month_start, date])
+    thismonth_members = PT_members.filter(PT_registered_date__range=[this_month_start, date])
     thismonth_members_pay = thismonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if thismonth_members else 0
+    print(thismonth_members)
+    print(thismonth_members_pay)
 
     ###저번달
     if date.month == 1: #1월이면, 작년 12월 return
@@ -178,13 +319,13 @@ def PT_mypage(request, staff_id): #피트니스의 마이페이지
         year = date.year
         last_month = date.month-1
 
-    lastmonth_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=last_month)
+    lastmonth_members = PT_members.filter(PT_registered_date__year=year).filter(PT_registered_date__month=last_month)
     lastmonth_members_pay = lastmonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if lastmonth_members else 0
     #####커미션##########
     basic_salary = staff.basic_salary
-    last_team_sales=int(0)
+    last_team_sales_before=int(0)
     last_tuition = int(0)
-    this_team_sales=int(0)
+    this_team_sales_before=int(0)
     this_tuition = int(0)
 
     team_members = User.objects.filter(groups__name='Fitness') #피트니스 팀 직원들
@@ -193,12 +334,75 @@ def PT_mypage(request, staff_id): #피트니스의 마이페이지
 
     for f in team_members:
         PT_members = f.PT_members.all()
-        last_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=last_month) #지난달 등록한 Fitness PT회원들
+        last_members = PT_members.filter(PT_registered_date__year=year).filter(PT_registered_date__month=last_month) #지난달 등록한 Fitness PT회원들
         members_pay = last_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if last_members else 0 #Suspect some of members is None
-        last_team_sales = last_team_sales + members_pay #저번달 팀 총 매출
-        this_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=date.month) #이번달 등록한 Fitness PT회원들
+        last_team_sales_before = last_team_sales_before + members_pay #저번달 팀 총 매출
+        this_members = PT_members.filter(PT_registered_date__year=year).filter(PT_registered_date__month=date.month) #이번달 등록한 Fitness PT회원들
         this_members_pay = this_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if this_members else 0 #Suspect some of members is None
-        this_team_sales = this_team_sales + this_members_pay # 이번달 팀 총 매출
+        this_team_sales_before = this_team_sales_before + this_members_pay # 이번달 팀 총 매출
+
+
+    ######################환불################
+
+    last_refund_list = RefundHistory.objects.none()
+    this_refund_list = RefundHistory.objects.none()
+    for m in staff.PT_members.all(): #나의 회원만.
+        payment = m.PaymentHistory.filter(division="Fitness")
+        for p in payment:
+            try:
+                last_refund = RefundHistory.objects.filter(payment=p).filter(refund_date__year=year).filter(refund_date__month=last_month)
+                last_refund_list |= last_refund
+
+                this_refund = RefundHistory.objects.filter(payment=p).filter(refund_date__range=[this_month_start, date])
+                this_refund_list |= this_refund
+            except:
+                pass
+    last_refund_list = last_refund_list.distinct()
+    this_refund_list = this_refund_list.distinct()
+
+    last_personal_refund = int(0)
+    for i in last_refund_list:
+        last_personal_refund = last_personal_refund + i.refund_amount #지난달 나의 회원 총 환불.
+
+    this_personal_refund = int(0)
+    for i in this_refund_list:
+        this_personal_refund = this_personal_refund + i.refund_amount #이번달 나의 회원 총 환불.
+
+    last_Fitness_refund = RefundHistory.objects.filter(division="Fitness").filter(refund_date__year=year).filter(refund_date__month=last_month)  #지난달 회원권 총 환불.
+
+    last_Fitness_refund_amount = last_Fitness_refund.aggregate(Sum('refund_amount')).get('refund_amount__sum',0.00) if last_Fitness_refund else 0 #Suspect some of members
+
+    this_Fitness_refund = RefundHistory.objects.filter(division="Fitness").filter(refund_date__range=[this_month_start, date]) #이번달 회원권 총 환불.
+
+    this_Fitness_refund_amount = this_Fitness_refund.aggregate(Sum('refund_amount')).get('refund_amount__sum',0.00) if this_Fitness_refund else 0 #Suspect some of members
+
+    #######환불End####################
+    #
+    ######총매출 - 환불##############
+    #지난달
+    last_team_sales = last_team_sales_before - last_Fitness_refund_amount
+    if last_team_sales <0:
+        last_team_sales=0
+
+    lastmonth_members_pay_before = lastmonth_members_pay
+    lastmonth_members_pay = lastmonth_members_pay_before - last_personal_refund
+    if lastmonth_members_pay < 0:
+        lastmonth_members_pay=0
+
+    ## 이번달 FC팀 총 매출 - 이번달 FC팀 환불
+    this_team_sales = this_team_sales_before - this_Fitness_refund_amount
+    if this_team_sales < 0 :
+        this_team_sales =0
+
+    # 이번달 나의 총 매출 - 이번달 나의 환불
+    thismonth_members_pay_before = thismonth_members_pay
+    thismonth_members_pay = thismonth_members_pay_before - this_personal_refund
+    # print(thismonth_members_pay)
+    if thismonth_members_pay < 0:
+        thismonth_members_pay = 0
+
+    ######총매출 - 환불 End###########
+    #
 
     #팀장이면
     if staff.teamleader == True:
@@ -234,7 +438,6 @@ def PT_mypage(request, staff_id): #피트니스의 마이페이지
     last_total = int(staff.basic_salary) + int(last_commission) + int(last_tuition)
     this_total = int(staff.basic_salary) + int(this_commission) + int(this_tuition)
 
-
     context={
         'staff' : staff,
         'PT_members' : PT_members,
@@ -244,23 +447,34 @@ def PT_mypage(request, staff_id): #피트니스의 마이페이지
         'thisweek_members_pay' :thisweek_members_pay,
         'thismonth_members' : thismonth_members,
         'thismonth_members_pay' : thismonth_members_pay,
+        'thismonth_members_pay_before':thismonth_members_pay_before,
         'basic_salary' :basic_salary,
+        'lastmonth_schedules' :lastmonth_schedules,
+        'thismonth_schedules':thismonth_schedules,
 
         'lastmonth_members_pay' :lastmonth_members_pay,
         #지난달
-        'last_team_sales' : last_team_sales,
+        'last_team_sales_before' : last_team_sales_before,
         'last_commission_rate' : last_commission_rate,
         'last_commission' : last_commission,
         'last_tuition_commission' : last_tuition_commission,
         'last_tuition' : last_tuition,
         'last_total' : last_total,
         #이번달
-        'this_team_sales' : this_team_sales,
+        'this_team_sales_before' : this_team_sales_before,
         'this_commission_rate' : this_commission_rate,
         'this_commission' : this_commission,
         'this_tuition_commission' : this_tuition_commission,
         'this_tuition' : this_tuition,
         'this_total' : this_total,
+        ###환불
+        'this_refund_list' : this_refund_list,
+        'last_personal_refund' : last_personal_refund,
+        'last_Fitness_refund' : last_Fitness_refund,
+        'last_Fitness_refund_amount' : last_Fitness_refund_amount,
+        'this_personal_refund' : this_personal_refund,
+        'this_Fitness_refund' : this_Fitness_refund,
+        'this_Fitness_refund_amount' : this_Fitness_refund_amount,
 
     }
 
@@ -271,17 +485,17 @@ def Pilates_mypage(request, staff_id):
     PT_members = staff.PT_members.all()
     date = datetime.date.today() #오늘 받기
     #####오늘#####
-    today_members = PT_members.filter(registered_date=date) #오늘 등록한 회원
+    today_members = PT_members.filter(PT_registered_date=date) #오늘 등록한 회원
     today_members_pay = today_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
     #####이번주####
     start_week = date- datetime.timedelta(date.weekday()) #이번주(월요일시작)
     end_week = start_week + datetime.timedelta(6) #월요일 + 6 (일요일)
     this_month = datetime.timedelta(date.month)
-    thisweek_members = PT_members.filter(registered_date__range=[start_week, end_week])
+    thisweek_members = PT_members.filter(PT_registered_date__range=[start_week, end_week])
     thisweek_members_pay = thisweek_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
     ####이번달####
     this_month_start = datetime.datetime(date.year, date.month, 1) #이번달의 1일
-    thismonth_members = PT_members.filter(registered_date__range=[this_month_start, date])
+    thismonth_members = PT_members.filter(PT_registered_date__range=[this_month_start, date])
     thismonth_members_pay = thismonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if thismonth_members else 0
 
     ###저번달
@@ -292,13 +506,13 @@ def Pilates_mypage(request, staff_id):
         year = date.year
         last_month = date.month-1
 
-    lastmonth_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=last_month)
+    lastmonth_members = PT_members.filter(PT_registered_date__year=year).filter(PT_registered_date__month=last_month)
     lastmonth_members_pay = lastmonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if lastmonth_members else 0
     #####커미션##########
     basic_salary = staff.basic_salary
-    last_team_sales=int(0)
+    last_team_sales_before=int(0)
     last_tuition = int(0)
-    this_team_sales=int(0)
+    this_team_sales_before=int(0)
     this_tuition = int(0)
 
     team_members = User.objects.filter(groups__name='Pilates') #필라테스 팀 직원들
@@ -310,12 +524,75 @@ def Pilates_mypage(request, staff_id):
 
     for f in team_members:
         PT_members = f.PT_members.all()
-        last_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=last_month) #지난달 등록한 Pilates PT회원들
+        last_members = PT_members.filter(PT_registered_date__year=year).filter(PT_registered_date__month=last_month) #지난달 등록한 Pilates PT회원들
         last_members_pay = last_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if last_members else 0 #Suspect some of members is None
-        last_team_sales = last_team_sales + last_members_pay #저번달 팀 총 매출
-        this_members = PT_members.filter(registered_date__year=year).filter(registered_date__month=date.month) #이번달 등록한 Pilates PT회원들
+        last_team_sales_before = last_team_sales_before + last_members_pay #저번달 팀 총 매출
+        this_members = PT_members.filter(PT_registered_date__year=year).filter(PT_registered_date__month=date.month) #이번달 등록한 Pilates PT회원들
         this_members_pay = this_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if this_members else 0 #Suspect some of members is None
-        this_team_sales = this_team_sales + this_members_pay # 이번달 팀 총 매출
+        this_team_sales_before = this_team_sales_before + this_members_pay # 이번달 팀 총 매출
+
+    ######################환불################
+
+    last_refund_list = RefundHistory.objects.none()
+    this_refund_list = RefundHistory.objects.none()
+    for m in staff.PT_members.all(): #나의 회원만.
+        payment = m.PaymentHistory.filter(division="Pilates")
+        for p in payment:
+            try:
+                last_refund = RefundHistory.objects.filter(payment=p).filter(refund_date__year=year).filter(refund_date__month=last_month)
+                last_refund_list |= last_refund
+
+                this_refund = RefundHistory.objects.filter(payment=p).filter(refund_date__range=[this_month_start, date])
+                this_refund_list |= this_refund
+            except:
+                pass
+    last_refund_list = last_refund_list.distinct()
+    this_refund_list = this_refund_list.distinct()
+
+    last_personal_refund = int(0)
+    for i in last_refund_list:
+        last_personal_refund = last_personal_refund + i.refund_amount #지난달 나의 회원 총 환불.
+
+    this_personal_refund = int(0)
+    for i in this_refund_list:
+        this_personal_refund = this_personal_refund + i.refund_amount #이번달 나의 회원 총 환불.
+
+    last_Pilates_refund = RefundHistory.objects.filter(division="Pilates").filter(refund_date__year=year).filter(refund_date__month=last_month)  #지난달 필라팀 총 환불.
+
+    last_Pilates_refund_amount = last_Pilates_refund.aggregate(Sum('refund_amount')).get('refund_amount__sum',0.00) if last_Pilates_refund else 0 #Suspect some of members
+
+    this_Pilates_refund = RefundHistory.objects.filter(division="Pilates").filter(refund_date__range=[this_month_start, date]) #이번달 필라팀 총 환불.
+
+    this_Pilates_refund_amount = this_Pilates_refund.aggregate(Sum('refund_amount')).get('refund_amount__sum',0.00) if this_Pilates_refund else 0 #Suspect some of members
+
+    #######환불End####################
+    #
+    ######총매출 - 환불##############
+    #지난달
+    last_team_sales = last_team_sales_before - last_Pilates_refund_amount
+    if last_team_sales <0:
+        last_team_sales=0
+
+    lastmonth_members_pay_before = lastmonth_members_pay
+    lastmonth_members_pay = lastmonth_members_pay_before - last_personal_refund
+    if lastmonth_members_pay < 0:
+        lastmonth_members_pay=0
+
+    ## 이번달 FC팀 총 매출 - 이번달 FC팀 환불
+    this_team_sales = this_team_sales_before - this_Pilates_refund_amount
+    if this_team_sales < 0 :
+        this_team_sales =0
+
+    # 이번달 나의 총 매출 - 이번달 나의 환불
+    thismonth_members_pay_before = thismonth_members_pay
+    thismonth_members_pay = thismonth_members_pay_before - this_personal_refund
+    # print(thismonth_members_pay)
+    if thismonth_members_pay < 0:
+        thismonth_members_pay = 0
+
+    ######총매출 - 환불 End###########
+    #
+    #
 
     #팀장이면
     if staff.teamleader == True:
@@ -404,11 +681,12 @@ def Pilates_mypage(request, staff_id):
         'thisweek_members_pay' :thisweek_members_pay,
         'thismonth_members' : thismonth_members,
         'thismonth_members_pay' : thismonth_members_pay,
+        'thismonth_members_pay_before':thismonth_members_pay_before,
         'basic_salary' :basic_salary,
 
         'lastmonth_members_pay' :lastmonth_members_pay,
         #지난달
-        'last_team_sales' : last_team_sales,
+        'last_team_sales_before' : last_team_sales_before,
         'last_commission' : last_commission,
         'last_commission_rate' : last_commission_rate,
         'last_GX_commission' : last_GX_commission,
@@ -418,7 +696,7 @@ def Pilates_mypage(request, staff_id):
         'last_PT_commission_rate' : last_PT_commission_rate,
         'last_total' : last_total,
         #이번달
-        'this_team_sales' : this_team_sales,
+        'this_team_sales_before' : this_team_sales_before,
         'this_commission' : this_commission,
         'this_commission_rate' : this_commission_rate,
         'this_GX_commission' : this_GX_commission,
@@ -427,6 +705,14 @@ def Pilates_mypage(request, staff_id):
         'thismonth_PT_schedules' : thismonth_PT_schedules.count(),
         'this_PT_commission_rate' : this_PT_commission_rate,
         'this_total' : this_total,
+        ###환불
+        'this_refund_list' : this_refund_list,
+        'last_personal_refund' : last_personal_refund,
+        'last_Pilates_refund' : last_Pilates_refund,
+        'last_Pilates_refund_amount' : last_Pilates_refund_amount,
+        'this_personal_refund' : this_personal_refund,
+        'this_Pilates_refund' : this_Pilates_refund,
+        'this_Pilates_refund_amount' : this_Pilates_refund_amount,
 
     }
     return render(request, 'Pilates_mypage.html', context)
@@ -455,7 +741,7 @@ def PT_member_detail(request, PT_member_id):
 def PT_member_session_end(request, PT_member_id):
     p = Member.objects.get(id=PT_member_id)
     if p.re_registered==True: #재등록회원이라면
-        for h in History.objects.filter(user=p).filter(birth=p.birth).filter(registered_date__gte=p.registered_date): #큰쪽이 더 최신날짜
+        for h in History.objects.filter(user=p).filter(birth=p.birth).filter(PT_registered_date__gte=p.PT_registered_date): #큰쪽이 더 최신날짜
         #해당회원의 히스토리중, 만료된 세션 등록일보다 더 최근에 등록한 히스토리를 찾는다.
             p.Trainer = h.Trainer
             p.registered_session = h.registered_session
@@ -463,9 +749,10 @@ def PT_member_session_end(request, PT_member_id):
             p.PT_payment_method = h.PT_payment_method
             p.unitprice = h.unitprice
             p.period_PT = h.period_PT
-            p.registered_date = h.registered_date
+            p.PT_registered_date = h.PT_registered_date
             p.used_session = 0
             p.re_registered = False #재등록여부는 다시 false로
+            p.PT_status = 0 #만료
             p.save()
     else: #재등록회원이 아니라면, pt등록정보 초기화
         p.Trainer = None
@@ -474,7 +761,7 @@ def PT_member_session_end(request, PT_member_id):
         p.PT_payment_method = None
         p.unitprice = None
         p.period_PT = None
-        p.registered_date = None
+        p.PT_registered_date = None
         p.used_session = 0
         p.save()
     return redirect('schedule')
@@ -489,7 +776,7 @@ def PT_member_delete(request, PT_member_id):
         # p.PT_payment_method = None
         # p.unitprice = None
         # p.period_PT = None
-        # p.registered_date = None
+        # p.PT_registered_date = None
         # p.re_registered = False
         p.save()
     messages.info(request, 'PT회원이 삭제되었습니다.')
@@ -503,7 +790,10 @@ def PT_register(request): #PT_register_list (회원리스트)
     return render(request, 'PT_register.html', context)
 
 def PT_register_create(request, member_id):
+    staff = request.user
     member = Member.objects.get(id=member_id)
+    member.PT_status = 1
+    member.save()
 
     if request.method == 'POST':
         form = PT_RegisterForm(request.POST , instance=member)
@@ -511,7 +801,7 @@ def PT_register_create(request, member_id):
         if form.is_valid() and form1.is_valid():
             if member.Trainer != request.user: #재등록이 아니라면,
                 member.Trainer = request.user
-                member.registered_date = datetime.date.today() #오늘
+                member.PT_registered_date = datetime.date.today() #오늘
                 form.save()
 
             else: #재등록이라면 재등록여부를 true로 하기
@@ -522,6 +812,14 @@ def PT_register_create(request, member_id):
             history.user = member
             history.birth = member.birth
             history.Trainer=request.user
+            #Fitness/Pilates 구분
+            if staff.groups.filter(name__in=['Fitness']).exists():
+                history.division = "Fitness"
+            elif staff.groups.filter(name__in=['Pilates']).exists():
+                history.division = "Pilates"
+            else:
+                pass
+
             check = History.objects.filter(user=member).filter(birth=member.birth) #그동안 몇번 pt등록했는지 확인
             if check.exists():
                 history_num = check.count()
@@ -529,7 +827,31 @@ def PT_register_create(request, member_id):
             else:
                 history.Num = 1
 
-            history.save()
+            history.save() #PT내역.
+
+            if staff.groups.filter(name__in=['Fitness']).exists():
+                PaymentHistory.objects.create( #결제내역
+                    user = member,
+                    division = 'Fitness',
+                    date = member.PT_registered_date,
+                    start_date = member.start_date,
+                    end_date = member.end_date,
+                    registered_session = member.registered_session,
+                    payment_amount = member.PT_payment_amount,
+                )
+            elif staff.groups.filter(name__in=['Pilates']).exists():
+                PaymentHistory.objects.create( #결제내역
+                    user = member,
+                    division = 'Pilates',
+                    date = member.PT_registered_date,
+                    start_date = member.start_date,
+                    end_date = member.end_date,
+                    registered_session = member.registered_session,
+                    payment_amount = member.PT_payment_amount,
+                )
+            else:
+                pass
+
             return redirect('schedule')
 
 
@@ -581,9 +903,9 @@ def schedule_add(request):
         else:
             member = Member.objects.get(id=request.POST.get('id')) #넘겨온 id의 회원 찾기
 
-            succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(registered_date=member.registered_date).filter(start__gt=start).filter(~Q(title__icontains='OT')) #뒤에 있는 스케줄들
+            succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(PT_registered_date=member.PT_registered_date).filter(start__gt=start).filter(~Q(title__icontains='SV')) #뒤에 있는 스케줄들
 
-            if 'OT' in title: #OT 버튼이라면
+            if 'SV' in title: #OT 버튼이라면
                 member.used_session = member.used_session+0 #세션추가 없음
                 unitprice= 0
                 used_session = member.used_session
@@ -616,7 +938,7 @@ def schedule_add(request):
                 start = start,
                 end = end,
                 birth= member.birth,
-                registered_date = member.registered_date,
+                PT_registered_date = member.PT_registered_date,
                 used_session = used_session,
                 registered_session = member.registered_session,
                 unitprice = unitprice #수수료 10%제외한 단가
@@ -638,9 +960,9 @@ def schedule_delete(request, schedule_id):
     else:
         member = schedule.name #해당 회원 찾기
 
-        succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(registered_date=schedule.registered_date).filter(start__gt=schedule.start).filter(~Q(title__icontains='OT')) #같은 회원권 스케줄중(OT가 아닌), 빠른 날짜가 있는지 찾는다. 큰쪽이 더 최신날짜
+        succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(PT_registered_date=schedule.PT_registered_date).filter(start__gt=schedule.start).filter(~Q(title__icontains='SV')) #같은 회원권 스케줄중(OT가 아닌), 빠른 날짜가 있는지 찾는다. 큰쪽이 더 최신날짜
 
-        if 'OT' in schedule.title : #OT 버튼이라면
+        if 'SV' in schedule.title : #OT 버튼이라면
                 member.used_session = member.used_session+0 #세션삭제 없음
         else:
             if succeeding_schedule.exists(): #현재 지우는 스케줄보다 뒤에 스케줄이 있다면

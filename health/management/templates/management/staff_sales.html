@@ -13,13 +13,13 @@
                 <th>인원</th>
                 <th>팀 총매출</th>
                 <th>개인 매출</th>
+                <th>팀 총 환불</th>
+                <th>개인 총 환불</th>
                 <th>기본급</th>
                 <th>커미션 비율</th>
                 <th>커미션</th>
                 <th>개인 커미션 비율</th>
                 <th>개인 커미션</th>
-                <th>합계</th>
-                <th>환불</th>
                 <th>월급</th>
 
             </tr>
@@ -29,13 +29,13 @@
                 <td>{{ s.number }}</td>
                 <td>{{ s.team_sales |intcomma}}원</td>
                 <td>{{ s.personal_sales |intcomma}}원</td>
+                <td>{{ s.FC_refund |intcomma}}원</td>
+                <td>{{ s.personal_refund |intcomma}}원</td>
                 <td>{{ s.basic_salary |intcomma}}원</td>
                 <td>{{ s.commission_rate }}%</td>
                 <td>{{ s.commission |intcomma}}원</td>
                 <td>{{ s.personal_commission_rate }}%</td>
                 <td>{{ s.personal_commission |intcomma}}원</td>
-                <td>{{ s.total |intcomma}}원</td>
-                <td>{{ s.refund |intcomma}}원</td>
                 <td>{{ s.salary |intcomma}}원</td>
             </tr>
             {% endfor %}

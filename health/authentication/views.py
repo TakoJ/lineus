@@ -53,13 +53,13 @@ def fc_salary_save(request):
             number = team_members.count()-1, #팀장제외.
             team_sales = Decimal(request.POST.get('team_sales', None).replace(",","")),
             personal_sales = Decimal(request.POST.get('personal_sales', None).replace(",","")),
+            FC_refund = Decimal(request.POST.get('FC_refund', None).replace(",","")),
+            personal_refund = Decimal(request.POST.get('personal_refund', None).replace(",","")),
             basic_salary = Decimal(request.POST.get('basic_salary', None).replace(",","")),
             commission_rate = float(request.POST.get('commission_rate', None)),
             commission = Decimal(request.POST.get('commission', None).replace(",","")),
             personal_commission_rate = float(request.POST.get('personal_commission_rate', None)),
             personal_commission = Decimal(request.POST.get('personal_commission', None).replace(",","")),
-            total = Decimal(request.POST.get('total', None).replace(",","")),
-            refund = Decimal(request.POST.get('refund', None)),
             salary = Decimal(request.POST.get('salary', None).replace(",","")),
             )
         context = {}
@@ -83,13 +83,13 @@ def fitness_salary_save(request):
             date = lastMonth,
             team_sales = Decimal(request.POST.get('team_sales', None).replace(",","")),
             personal_sales = Decimal(request.POST.get('personal_sales', None).replace(",","")),
+            Fitness_refund = Decimal(request.POST.get('Fitness_refund', None).replace(",","")),
+            personal_refund = Decimal(request.POST.get('personal_refund', None).replace(",","")),
             basic_salary = Decimal(request.POST.get('basic_salary', None).replace(",","")),
             commission_rate = float(request.POST.get('commission_rate', None)),
             commission = Decimal(request.POST.get('commission', None).replace(",","")),
             tuition_rate = int(request.POST.get('tuition_rate', None)),
             tuition = Decimal(request.POST.get('tuition', None).replace(",","")),
-            total = Decimal(request.POST.get('total', None).replace(",","")),
-            refund = Decimal(request.POST.get('refund', None)),
             salary = Decimal(request.POST.get('salary', None).replace(",","")),
             )
         context = {}
@@ -113,6 +113,8 @@ def pilates_salary_save(request):
             date = lastMonth,
             team_sales = Decimal(request.POST.get('team_sales', None).replace(",","")),
             personal_sales = Decimal(request.POST.get('personal_sales', None).replace(",","")),
+            Pilates_refund = Decimal(request.POST.get('Pilates_refund', None).replace(",","")),
+            personal_refund = Decimal(request.POST.get('personal_refund', None).replace(",","")),
             basic_salary = Decimal(request.POST.get('basic_salary', None).replace(",","")),
             commission_rate = float(request.POST.get('commission_rate', None)),
             commission = Decimal(request.POST.get('commission', None).replace(",","")),
@@ -120,8 +122,6 @@ def pilates_salary_save(request):
             GX_commission = Decimal(request.POST.get('GX_commission', None).replace(",","")),
             PT_commission_rate = float(request.POST.get('PT_commission_rate', None)),
             PT_commission = Decimal(request.POST.get('PT_commission', None).replace(",","")),
-            total = Decimal(request.POST.get('total', None).replace(",","")),
-            refund = Decimal(request.POST.get('refund', None)),
             salary = Decimal(request.POST.get('salary', None).replace(",","")),
             )
         context = {}

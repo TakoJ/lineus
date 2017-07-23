@@ -18,25 +18,33 @@
 
 <div class="btn btn-default">이번달</div>
 <span>{{thismonth_members.count}}명</span>
-<span>{{thismonth_members_pay |intcomma}}원</span>
+<span>{{thismonth_members_pay_before |intcomma}}원</span>
 
 
 {% if request.user.is_superuser %}
-<div class="btn btn-danger" data-toggle="modal" data-target="#save" style="float:right;">지난 달 저장</div>
+<div class="btn btn-whatever" data-toggle="modal" data-target="#save" style="float:right;">지난 달 저장</div>
 {% else %}
 {% endif %}
 <hr/>
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-success">지난달 Pilates팀 총 매출</a>
-<p> </p>
-<p><span class="team_sales">{{last_team_sales |intcomma}}</span>원</p>
+<p><span class="team_sales">{{last_team_sales_before |intcomma}}</span>원</p>
 </div>
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-success">지난달 나의 총 매출</a>
-<p> </p>
 <p><span class="personal_sales">{{lastmonth_members_pay |intcomma}}</span>원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">지난달 Pilates팀 환불</a>
+<p><span class="last_Pilates_refund_amount">{{ last_Pilates_refund_amount|intcomma }}</span>원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">지난달 나의 회원 환불</a>
+<p><span class="last_personal_refund">{{ last_personal_refund|intcomma }}</span>원</p>
 </div>
 
 <hr/>
@@ -62,21 +70,11 @@
 <div class="text-center" style="display: inline-block;">
 <div class="btn btn-warning">지난달 PT 수업료</div>
 {% if staff.teamleader %}
-    <p><span>{{ lastmonth_PT_schedules }}명</span>
+    <p>(<span>{{ lastmonth_PT_schedules }}회</span>)
 {% else %}
-    <p><span class="PT_commission_rate">{{ last_PT_commission_rate }}</span>%
+    <p>(<span class="PT_commission_rate">{{ last_PT_commission_rate }}</span>%)
 {% endif %}
-    <span class="PT_commission">{{ last_PT_commission |intcomma}}</span>원</p>
-</div>
-
-<div class="text-center" style="display: inline-block;">
-<div class="btn btn-warning">지난달 총합계</div>
-<p><span class="total">{{ last_total |intcomma}}</span>원</p>
-</div>
-
-<div class="text-center" style="display: inline-block;">
-<div class="btn btn-warning">지난달 환불</div>
-<p><span class="refund">0</span>원</p>
+     / <span class="PT_commission">{{ last_PT_commission |intcomma}}</span>원</p>
 </div>
 
 <div class="text-center" style="display: inline-block;">
@@ -86,38 +84,60 @@
 
 <hr>
 
-<div class="btn btn-primary">이번달 기본급</div>
-<span>{{ basic_salary |intcomma}}원</span>
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-success">이번달 Pilates팀 총 매출</a>
+<p><span class="team_sales">{{this_team_sales_before |intcomma}}</span>원</p>
+</div>
 
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-success">이번달 나의 총 매출</a>
+<p><span class="personal_sales">{{thismonth_members_pay_before |intcomma}}</span>원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 Pilates팀 환불</a>
+<p>{{ this_Pilates_refund_amount|intcomma }}원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 나의 회원 환불</a>
+<p>{{ this_personal_refund|intcomma }}원</p>
+</div>
+
+<hr/>
+
+<div class="text-center" style="display: inline-block;">
+<div class="btn btn-primary">이번달 기본급</div>
+<p>{{ basic_salary |intcomma}}원</p>
+</div>
 
 {% if staff.teamleader %}
+<div class="text-center" style="display: inline-block;">
 <div class="btn btn-primary">이번달 커미션</div>
-<span>{{this_commission_rate}}%</span>
-<span>{{this_commission |intcomma}}원</span>
+<p>({{this_commission_rate}}%) / {{this_commission |intcomma}}원</p>
+</div>
 {% else %}
 {% endif %}
 
-
+<div class="text-center" style="display: inline-block;">
 <div class="btn btn-primary">이번달 GX 수업료</div>
-<span>{{ thismonth_GX_schedules }}번</span>
-<span>{{ this_GX_commission |intcomma}}원</span>
+<p>({{ thismonth_GX_schedules }}번) / {{ this_GX_commission |intcomma}}원</p>
+</div>
 
+<div class="text-center" style="display: inline-block;">
 <div class="btn btn-primary">이번달 PT 수업료</div>
 {% if staff.teamleader %}
-    <span>{{ thismonth_PT_schedules }}명</span>
+    <p>({{ thismonth_PT_schedules }}회)
 {% else %}
-    <span>{{ this_PT_commission_rate }}%</span>
+    <p>({{ this_PT_commission_rate }}%)
 {% endif %}
-<span>{{ this_PT_commission |intcomma}}원</span>
+ / {{ this_PT_commission |intcomma}}원</p>
+</div>
 
-<div class="btn btn-primary">이번달 총합계</div>
-<span>{{ this_total |intcomma }}원</span>
-
-<div class="btn btn-primary">이번달 환불</div>
-<span>0원</span>
-
+<div class="text-center" style="display: inline-block;">
 <div class="btn btn-primary">이번달 월급</div>
-<span>{{ this_total |intcomma }}원</span>
+<p>{{ this_total |intcomma }}원</p>
+</div>
 
 <hr/>
 <table class="table table-bordered">
@@ -127,16 +147,18 @@
         <th>환불액</th>
         <th>삭감 커미션</th>
     </tr>
+    {% for refund in this_refund_list %}
     <tr>
-        <td>1</td>
-        <td>2</td>
-        <td>3</td>
-        <td>4</td>
+        <td>{{refund.payment }}</td>
+        <td>{{ refund.date }}</td>
+        <td>{{refund.refund_date}}</td>
+        <td>{{refund.refund_amount |intcomma}}원</td>
     </tr>
+    {% endfor %}
     <tr>
-    <th colspan="3">환불 총합</th>
-    <td>142</td>
-    </tr>
+        <th colspan="3">환불 총합 </th>
+        <td>{{ this_personal_refund |intcomma}}원</td>
+    <tr>
 </table>
 
 </div>
@@ -179,16 +201,15 @@
         id = {{staff.id}}
         team_sales = $('.team_sales').text();
         personal_sales = $('.personal_sales').text();
+        Pilates_refund = $('.last_Pilates_refund_amount').text();
+        personal_refund = $('.last_personal_refund').text();
+
         basic_salary = $('.basic_salary').text();
-
         GX_commission = $('.GX_commission').text();
-
         PT_commission = $('.PT_commission').text();
-        total = $('.total').text();
-        refund = $('.refund').text();
         salary = $('.salary').text();
 
-        var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "id":id, 'team_sales':team_sales, 'personal_sales':personal_sales, 'basic_salary':basic_salary, 'commission_rate':commission_rate, 'commission':commission, 'GX_commission':GX_commission,'PT_commission_rate':PT_commission_rate, 'PT_commission':PT_commission, 'total':total, 'refund':refund, 'salary':salary};
+        var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "id":id, 'team_sales':team_sales, 'personal_sales':personal_sales, 'Pilates_refund':Pilates_refund, 'personal_refund':personal_refund,'basic_salary':basic_salary, 'commission_rate':commission_rate, 'commission':commission, 'GX_commission':GX_commission,'PT_commission_rate':PT_commission_rate, 'PT_commission':PT_commission, 'salary':salary};
         $.ajax({
             url: "{% url 'authentication:pilates_salary_save' %}",
             type: "POST",

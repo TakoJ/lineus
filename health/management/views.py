@@ -7,8 +7,9 @@ from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Group
 from management.models import FC_Teamleader_Commission, FC_Personal_Commission, FC_Team_Commission, Fitness_Teamledaer_Commission, Fitness_Personal_Commission, Pilates_Teamleader_Commission,  Pilates_Commission, Pilates_GX_Basic, Pilates_GX_DependingNum, Pilates_PT
 from authentication.models import User,FC_Salary, Fitness_Salary,Pilates_Salary
-from staff.models import Member
+from staff.models import Member,PaymentHistory, RefundHistory
 from management.forms import CustomUserChangeForm, EditForm, FC_TeamLeader_EditForm
+from decimal import Decimal
 import datetime
 import json
 
@@ -22,6 +23,73 @@ def member_management(request):
         'member_list' : member_list,
     }
     return render(request, 'management/member_management.html', context)
+
+def payment_history(request, member_id):
+    member = Member.objects.get(id=member_id)
+    paymenthistory = PaymentHistory.objects.filter(user=member)
+    active_paymenthistory = PaymentHistory.objects.filter(user=member).filter(status=1)
+    refund_paymenthistory = PaymentHistory.objects.filter(user=member).filter(status=2)
+    expirated_paymenthistory = PaymentHistory.objects.filter(user=member).filter(status=0)
+
+    context = {
+        'member' : member,
+        'paymenthistory' : paymenthistory,
+        'active_paymenthistory' : active_paymenthistory,
+        'refund_paymenthistory' : refund_paymenthistory,
+        'expirated_paymenthistory' : expirated_paymenthistory,
+    }
+    return render(request, 'management/payment_history.html', context)
+
+def refund(request, history_id):
+    payment_history = PaymentHistory.objects.get(id=history_id)
+    member = payment_history.user
+    payment_history.status = 2
+    payment_history.save()
+    today = datetime.date.today()
+
+    if payment_history.division == "Membership":
+        member.Membership_status = 2
+        member.save()
+        remaining_period = (payment_history.end_date - today).days/(payment_history.end_date - payment_history.start_date).days
+
+        refund_amount = payment_history.payment_amount * Decimal(0.9) * Decimal(remaining_period)
+
+        RefundHistory.objects.create(
+            payment = payment_history,
+            division = "Membership",
+            date = payment_history.date,
+            refund_date = today, #오늘
+            refund_amount = refund_amount
+        )
+
+    elif payment_history.division =='Fitness':
+        member.PT_status = 2
+        member.save()
+        remaining_session = (payment_history.registered_session - member.used_session )/payment_history.registered_session
+        refund_amount = payment_history.payment_amount * Decimal(0.9) * Decimal(remaining_session)
+
+        RefundHistory.objects.create(
+            payment = payment_history,
+            division = "Fitness",
+            date = payment_history.date,
+            refund_date = today, #오늘
+            refund_amount = refund_amount
+        )
+    elif payment_history.division =='Pilates':
+        member.PT_status = 2
+        member.save()
+        remaining_session = (payment_history.registered_session - member.used_session )/payment_history.registered_session
+        refund_amount = payment_history.payment_amount * Decimal(0.9) * Decimal(remaining_session)
+
+        RefundHistory.objects.create(
+            payment = payment_history,
+            division = "Pilates",
+            date = payment_history.date,
+            refund_date = today, #오늘
+            refund_amount = refund_amount
+        )
+    return redirect('management:member_management')
+
 
 def staff_mypage(request, staff_id):
     staff = User.objects.get(id=staff_id)
@@ -231,7 +299,7 @@ def sales_search(request):
 
         for f in team_members:
             PT_members = f.PT_members.all()
-            members = PT_members.filter(registered_date__range=[startdate, enddate])
+            members = PT_members.filter(PT_registered_date__range=[startdate, enddate])
             members_pay = members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if members else 0 #Suspect some of members is None
             total = total + members_pay
             data = {'f':f, 'members_pay':members_pay}
@@ -263,7 +331,7 @@ def sales_search(request):
 
         for fit in Fitness_list:
             PT_members = fit.PT_members.all()
-            members = PT_members.filter(registered_date__range=[startdate, enddate])
+            members = PT_members.filter(PT_registered_date__range=[startdate, enddate])
             fit_members_pay = members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if members else 0
             fit_total = fit_total + fit_members_pay
             data2 = {'fit':fit, "fit_members_pay" : fit_members_pay}
@@ -271,7 +339,7 @@ def sales_search(request):
 
         for pil in Pilates_list:
             PT_members = pil.PT_members.all()
-            members = PT_members.filter(registered_date__range=[startdate, enddate])
+            members = PT_members.filter(PT_registered_date__range=[startdate, enddate])
             pil_members_pay = members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if members else 0
             pil_total = pil_total+pil_members_pay
             data3 = {'pil':pil, "pil_members_pay" : pil_members_pay}

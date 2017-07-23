@@ -12,12 +12,19 @@
     </thead>
     <tbody>
         <tr>
+            <th>회원구분</th>
+            <td><select name="division" class="select form-control" required>
+                <option value='신규'>신규</option>
+                <option value='재등록'>재등록</option>
+                </select></td>
+        </tr>
+        <tr>
             <th>성명*</th>
             <td><input type="text" name="name" class="textinput form-control" required></td>
         </tr>
         <tr>
             <th>생년월일*</th>
-            <td><input type="text" name="birth" class="dateinput form-control" placeholder="Ex) 1980-06-24" required></td>
+            <td><input type="date" name="birth" class="dateinput form-control" placeholder="Ex) 06/24/1980" required></td>
         </tr>
         <tr>
             <th>휴대번호*</th>
@@ -101,6 +108,16 @@
         </td>
     </tr>
     <tr>
+        <th>등록일</th>
+        <td><input type="date" name="registered_date" class="registered_date dateinput form-control" value="{{today}}" required></td>
+    </tr>
+    <tr>
+        <th>시작일</th>
+        <td><input type="date" name="start_date" class="start_date dateinput my-control"  value="{{today}}">
+        <strong> ~ 종료일</strong>
+        <input type="date" name="end_date" class="end_date dateinput my-control"></td>
+    </tr>
+    <tr>
         <th>추가사항(락카)</th>
         <td>
             <select name="locker" class="select my-control" id="locker">
@@ -147,6 +164,10 @@
             <option value="현금">현금</option>
             </select>
         </td>
+    </tr>
+    <tr>
+        <th>비고란</th>
+        <td><input type="text" name="note" class="form-control"></td>
     </tr>
 </tbody>
 </table>
@@ -199,4 +220,116 @@
     <button type="submit" class="btn btn-success" style="float:right;margin:10px;" >회원가입</button>
 </form>
 </div>
+
+<script type="text/javascript">
+
+    $('#period_fitness').on('change', function(){
+        var fitness_option = this.value;
+        if(fitness_option == "m1"){
+            day = 30
+        }
+        else if(fitness_option == 'm3'){
+            day = 90
+        }
+        else if(fitness_option == 'm6'){
+            day = 180
+        }
+        else if(fitness_option == 'm12'){
+            day = 365
+        }
+            start_date = $('.start_date').val()
+            var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "start_date":start_date, "day":day};
+            $.ajax({
+                    url: "{% url 'date_add' %}", // 통신할 url을 지정한다.
+                    type: "POST",
+                    data: allData, // 서버로 데이터를 전송할 때 이 옵션을 사용한다.
+                    dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
+
+                    success: function(response){
+                        $('.end_date').val(response.end_date);
+                        // 요청이 성공했을 경우 사용된 세션 +1
+                    },
+                    error:function(error){
+                        // 요청이 실패했을 경우
+                    }
+                });
+    }); //period_fitness
+
+     $('#period_pilates').on('change', function(){
+        var pilates_option = this.value;
+        if(pilates_option == 'se2m1'){
+            day=30;
+        }
+        else if(pilates_option == 'se3m1'){
+            day=30;
+        }
+        else if(pilates_option == 'se2m3'){
+            day=90;
+        }
+        else if(pilates_option == 'se3m3'){
+            day=90;
+        }
+        else if(pilates_option == 'se2m6'){
+            day=180;
+        }
+        else if(pilates_option == 'se3m6'){
+            day=180;
+        }
+        start_date = $('.start_date').val()
+        var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "start_date":start_date, "day":day};
+        $.ajax({
+                url: "{% url 'date_add' %}", // 통신할 url을 지정한다.
+                type: "POST",
+                data: allData, // 서버로 데이터를 전송할 때 이 옵션을 사용한다.
+                dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
+
+                success: function(response){
+                    $('.end_date').val(response.end_date);
+                    // 요청이 성공했을 경우 사용된 세션 +1
+                },
+                error:function(error){
+                    // 요청이 실패했을 경우
+                }
+            });
+    }); //period_pilates
+
+    $('#period_both').on('change', function(){
+        both_option =this.value;
+
+            if(both_option == 'se2m1'){
+                day=30;
+            }
+            else if(both_option=='se3m1'){
+                day=30;
+            }
+            else if(both_option=='se2m3'){
+                day=90;
+            }
+            else if(both_option=='se3m3'){
+                day=90;
+            }
+            else if(both_option=='se2m6'){
+                day=180;
+            }
+            else if(both_option=='se3m6'){
+                day=180;
+            }
+            start_date = $('.start_date').val()
+            var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "start_date":start_date, "day":day};
+            $.ajax({
+                    url: "{% url 'date_add' %}", // 통신할 url을 지정한다.
+                    type: "POST",
+                    data: allData, // 서버로 데이터를 전송할 때 이 옵션을 사용한다.
+                    dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
+
+                    success: function(response){
+                        $('.end_date').val(response.end_date);
+                        // 요청이 성공했을 경우 사용된 세션 +1
+                    },
+                    error:function(error){
+                        // 요청이 실패했을 경우
+                    }
+                });
+    }); //both
+</script>
 {% endblock %}

@@ -1,11 +1,16 @@
 from django import forms
-from .models import Member, History, Schedule
+from .models import Member, PaymentHistory, History, Schedule
 from functools import partial
 
 class RegisterForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ('name','birth','phone_num','address','sex','type_choice','rating','period_fitness','period_pilates','period_both','locker','period_locker','cautions','exercise_time','visit_path','payment_amount','payment_method')
+        fields = ('division','name','birth','phone_num','address','sex','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','period_locker','cautions','exercise_time','visit_path','payment_amount','payment_method','note')
+
+# class PaymentHistoryForm(forms.ModelForm):
+#     class Meta:
+#         model = PaymentHistory
+#         fields = ()
 
 
 

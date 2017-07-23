@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User, AbstractUser
+from django.conf import settings
 from django.db import models
 
 
@@ -15,18 +16,18 @@ class User(AbstractUser):
 
 class FC_Salary(models.Model):
     uid = models.IntegerField(null=True)
-    user = models.ForeignKey(User, verbose_name='이름', related_name='Salary')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='이름', related_name='FC_Salary')
     date = models.DateField(verbose_name='날짜')
     number = models.IntegerField(blank=True, null=True, verbose_name='팀 인원')
     team_sales = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='팀 매출')
     personal_sales = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='개인 매출')
+    FC_refund = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='FC팀 총 환불')
+    personal_refund = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='개인 환불')
     basic_salary = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='기본급')
-    commission_rate = models.FloatField(default=0.0, blank=True, verbose_name='커미션 비율')
-    commission =  models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='커미션')
+    commission_rate = models.FloatField(default=0.0, blank=True, verbose_name='팀커미션 비율')
+    commission =  models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='팀커미션')
     personal_commission_rate = models.FloatField(default=0.0,blank=True, verbose_name='개인 커미션 비율')
     personal_commission = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='개인 커미션')
-    total = models.DecimalField(max_digits=12, decimal_places=0,blank=True, default=0,verbose_name='합계')
-    refund = models.DecimalField(max_digits=10, decimal_places=0,blank=True, null=True, default=0,verbose_name='환불 합계')
     salary = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='월급')
 
     def __str__(self):
@@ -38,17 +39,17 @@ class FC_Salary(models.Model):
 
 class Fitness_Salary(models.Model):
     uid = models.IntegerField(null=True)
-    user = models.ForeignKey(User, verbose_name='이름', related_name='Fitness_Salary')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='이름', related_name='Fitness_Salary')
     date = models.DateField(verbose_name='날짜')
     team_sales = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='팀 매출')
     personal_sales = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='개인 매출')
+    Fitness_refund = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='Fitness팀 총 환불')
+    personal_refund = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='개인 환불')
     basic_salary = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='기본급')
     commission_rate = models.FloatField(default=0.0, verbose_name='커미션 비율')
     commission =  models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='커미션')
     tuition_rate =  models.IntegerField(default=0, verbose_name='수업료 비율')
     tuition = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='수업료')
-    total = models.DecimalField(max_digits=12, decimal_places=0,blank=True, default=0,verbose_name='합계')
-    refund = models.DecimalField(max_digits=10, decimal_places=0,blank=True, null=True, default=0,verbose_name='환불 합계')
     salary = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='월급')
 
     def __str__(self):
@@ -59,10 +60,12 @@ class Fitness_Salary(models.Model):
 
 class Pilates_Salary(models.Model):
     uid = models.IntegerField(null=True)
-    user = models.ForeignKey(User, verbose_name='이름', related_name='Pilates_Salary')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='이름', related_name='Pilates_Salary')
     date = models.DateField(verbose_name='날짜')
     team_sales = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='팀 매출')
     personal_sales = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='개인 매출')
+    Pilates_refund = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='Pilates팀 총 환불')
+    personal_refund = models.DecimalField(max_digits=19, decimal_places=0,blank=True, default=0,verbose_name='개인 환불')
     basic_salary = models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='기본급')
     commission_rate = models.FloatField(default=0.0, blank=True, verbose_name='커미션 비율')
     commission =  models.DecimalField(max_digits=10, decimal_places=0,blank=True, default=0,verbose_name='커미션')

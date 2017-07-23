@@ -19,23 +19,33 @@
 
 <div class="btn btn-default">이번달</div>
 <span>{{thismonth_members.count}}명</span>
-<span>{{thismonth_members_pay |intcomma}}원</span>
+<span>{{thismonth_members_pay_before |intcomma}}원</span>
 
-<hr>
+
 {% if request.user.is_superuser %}
-<a class="btn btn-danger" data-toggle="modal" data-target="#save" style="float:right;">지난 달 저장</a>
+<a class="btn btn-whatever" data-toggle="modal" data-target="#save" style="float:right;">지난 달 저장</a>
 {% else %}
 {% endif %}
+
+<hr/>
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-success">지난달 Fitness팀 총 매출</a>
-<p> </p>
-<p><span class="team_sales">{{last_team_sales |intcomma}}</span>원</p>
+<p><span class="team_sales">{{last_team_sales_before |intcomma}}</span>원</p>
 </div>
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-success">지난달 나의 총 매출</a>
-<p> </p>
 <p><span class="personal_sales">{{lastmonth_members_pay |intcomma}}</span>원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">지난달 Fitness팀 환불</a>
+<p><span class="last_Fitness_refund_amount">{{ last_Fitness_refund_amount|intcomma }}</span>원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">지난달 나의 회원 환불</a>
+<p><span class="last_personal_refund">{{ last_personal_refund|intcomma }}</span>원</p>
 </div>
 
 <hr/>
@@ -52,17 +62,7 @@
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-warning">지난달 수업료</a>
-<p>(<span class="tuition_rate">{{ last_tuition_commission }}</span>%) / <span class="tuition">{{ last_tuition |intcomma }}</span>원</p>
-</div>
-
-<div class="text-center" style="display: inline-block;">
-<a class="btn btn-warning">지난달 합계</a>
-<p><span class="total">{{ last_total|intcomma }}</span>원</p>
-</div>
-
-<div class="text-center" style="display: inline-block;">
-<a class="btn btn-warning">지난달 환불</a>
-<p><span class="refund">0</span>원</p>
+<p>(<span class="tuition_rate">{{ last_tuition_commission }}</span>%) / ({{thismonth_schedules.count}}회) <span class="tuition">{{ last_tuition |intcomma }}</span>원</p>
 </div>
 
 <div class="text-center" style="display: inline-block;">
@@ -75,10 +75,23 @@
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-success">이번달 Fitness팀 총 매출</a>
-<p> </p>
-<p>{{this_team_sales |intcomma}}원</p>
+<p>{{this_team_sales_before |intcomma}}원</p>
 </div>
 
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-success">이번달 나의 총 매출</a>
+<p><span class="personal_sales">{{thismonth_members_pay_before |intcomma}}</span>원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 Fitness팀 환불</a>
+<p>{{ this_Fitness_refund_amount|intcomma }}원</p>
+</div>
+
+<div class="text-center" style="display: inline-block;">
+<a class="btn btn-danger">이번달 나의 회원 환불</a>
+<p>{{ this_personal_refund|intcomma }}원</p>
+</div>
 <hr/>
 
 <div class="text-center" style="display: inline-block;">
@@ -94,24 +107,12 @@
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-primary">이번달 수업료</a>
-<p>({{ this_tuition_commission }}%) / {{ this_tuition |intcomma }}원</p>
-</div>
-
-
-
-<div class="text-center" style="display: inline-block;">
-<a class="btn btn-primary">이번달 합계</a>
-<p>{{ this_total|intcomma}}원</p>
-</div>
-
-<div class="text-center" style="display: inline-block;">
-<a class="btn btn-primary">이번달 환불</a>
-<p>원</p>
+<p>({{ this_tuition_commission }}%) /({{thismonth_schedules.count}}회) {{ this_tuition |intcomma }}원</p>
 </div>
 
 <div class="text-center" style="display: inline-block;">
 <a class="btn btn-primary">이번달 월급</a>
-<p>원</p>
+<p>{{ this_total|intcomma}}원</p>
 </div>
 
 <hr/>
@@ -119,20 +120,22 @@
 <table class="table table-bordered">
     <tr>
         <th>이름</th>
+        <th>결제일</th>
         <th>환불일</th>
         <th>환불액</th>
-        <th>삭감 커미션</th>
     </tr>
+    {% for refund in this_refund_list %}
     <tr>
-        <td>1</td>
-        <td>2</td>
-        <td>3</td>
-        <td>4</td>
+        <td>{{refund.payment }}</td>
+        <td>{{ refund.date }}</td>
+        <td>{{refund.refund_date}}</td>
+        <td>{{refund.refund_amount |intcomma}}원</td>
     </tr>
+    {% endfor %}
     <tr>
-    <th colspan="3">환불 총합</th>
-    <td>142</td>
-    </tr>
+        <th colspan="3">환불 총합 </th>
+        <td>{{ this_personal_refund |intcomma}}원</td>
+    <tr>
 </table>
 
 </div>
@@ -161,16 +164,16 @@
         id = {{staff.id}}
         team_sales = $('.team_sales').text();
         personal_sales = $('.personal_sales').text();
+        Fitness_refund = $('.last_Fitness_refund_amount').text();
+        personal_refund = $('.last_personal_refund').text();
         basic_salary = $('.basic_salary').text();
         commission_rate = $('.commission_rate').text();
         commission = $('.commission').text();
         tuition_rate = $('.tuition_rate').text();
         tuition = $('.tuition').text();
-        total = $('.total').text();
-        refund = $('.refund').text();
         salary = $('.salary').text();
 
-        var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "id":id, 'team_sales':team_sales, 'personal_sales':personal_sales, 'basic_salary':basic_salary, 'commission_rate':commission_rate, 'commission':commission, 'tuition_rate':tuition_rate,'tuition':tuition, 'total':total, 'refund':refund, 'salary':salary};
+        var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "id":id, 'team_sales':team_sales, 'personal_sales':personal_sales, 'Fitness_refund':Fitness_refund, 'personal_refund':personal_refund, 'basic_salary':basic_salary, 'commission_rate':commission_rate, 'commission':commission, 'tuition_rate':tuition_rate,'tuition':tuition, 'salary':salary};
         $.ajax({
             url: "{% url 'authentication:fitness_salary_save' %}",
             type: "POST",
