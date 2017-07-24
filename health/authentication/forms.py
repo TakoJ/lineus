@@ -24,8 +24,8 @@ class StaffRegisterForm(UserCreationForm): #usercreation inheritance
     email = forms.EmailField()
     team = forms.ChoiceField(choices=TEAM_CHOICES, widget=forms.RadioSelect())
     teamleader = forms.BooleanField(required=False) #팀장여부
-    pilates_GX = forms.ChoiceField(choices=GX_CHOICES, widget=forms.RadioSelect())
-    pilates_PT = forms.ChoiceField(choices=PT_CHOICES, widget=forms.RadioSelect())
+    pilates_GX = forms.ChoiceField(choices=GX_CHOICES, widget=forms.RadioSelect(), required=False)
+    pilates_PT = forms.ChoiceField(choices=PT_CHOICES, widget=forms.RadioSelect(), required=False)
 
     class Meta:
         model = User

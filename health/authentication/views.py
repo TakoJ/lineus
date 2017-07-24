@@ -23,7 +23,7 @@ def signup(request):
 
 def staff_register(request):
     if request.method == 'POST':
-        form = StaffRegisterForm(request.POST)
+        form = StaffRegisterForm(request.POST or None)
         if form.is_valid():
             form.save()
             return redirect('management:member_management')
