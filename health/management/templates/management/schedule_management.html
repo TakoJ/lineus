@@ -3,19 +3,24 @@
 <h2 class="text-center"><span class="header">스케줄 관리</span></h2>
 
 <div class="container">
-    <table class='table table-bordered text-center'>
-        <tr>
-            <th>이름</th>
-            <th>생년월일</th>
-            <th>팀</th>
-        </tr>
-        {% for staff in staff_list %}
-        <tr>
-            <td><a href="{% url "management:staff_schedule" staff.id %}">{{ staff }}</a></td>
-            <td>{{ staff.birth }}</td>
-            <td>{{ staff.groups.all.0 }}</td>
-        </tr>
-        {% endfor %}
+    <table id="myTable" class='table table-bordered text-center'>
+        <thead>
+            <tr>
+                <th><a class="order" href="?order_by=username">이름</a></th>
+                <th><a class="order" href="?order_by=birth">생년월일</a></th>
+                <th><a class="order" href="?order_by=groups">팀</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for staff in staff_list %}
+            <tr>
+                <td><a href="{% url "management:staff_schedule" staff.id %}">{{ staff }}</a></td>
+                <td>{{ staff.birth }}</td>
+                <td>{{ staff.groups.all.0 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </div>
+
 {% endblock %}

@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'django_extensions',
     #django-el-pagination
     'el_pagination',
+    #django-kronos
+    'kronos',
 ]
 
 MIDDLEWARE = [

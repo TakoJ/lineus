@@ -14,44 +14,64 @@
 
 <div class="tab-content">
     <div role="tabpanel" class="tab-pane fade in active" id="members">
+        <div id="search" style="margin:0 auto;">
+            <form id="search" method="GET" action="{% url 'management:member_search' %}">
+                <input type="text" class="form-control search_web" placeholder="이름,휴대번호로 검색해보세요." name='q' value="{{ q }}" style="display:inline-block; width:70%">
+                <button type="submit" class="btn btn-info" value="검색" >검색</button>
+            </form>
+        </div>
         <table class='table text-center'>
-            <tr>
-                <th>이름</th>
-                <th>성별</th>
-                <th>생년월일</th>
-                <th>결제내역</th>
-                <th>삭제</th>
-            </tr>
-            {% load el_pagination_tags %}
-            {% paginate 20 member_list %} <!-- 한페이지에 20개씩 표현 -->
-            {% for member in member_list %}
-            <tr>
-                <td><a href="{% url "management:edit_member" member.id %}">{{ member }}</a></td>
-                <td>{{ member.sex }}</td>
-                <td>{{ member.birth }}</td>
-                <td><a href="{%url "management:payment_history" member.id %}">결제내역</a></td>
-                <td><a class="btn btn-default" data-toggle="modal" data-target="#delete{{member.id}}">삭제</a></td>
-            </tr>
+            <thead>
+                <tr>
+                    <th><a class="order" href="?order_by=name">성명</a></th>
+                    <th><a class="order" href="?order_by=sex">성별</a></th>
+                    <th><a class="order" href="?order_by=birth">생년월일</a></th>
+                    <th><a class="order" href="?order_by=phone_num">휴대번호</a></th>
+                    <th><a class="order" href="?order_by=registered_date">등록일</a></th>
+                    <th><a class="order" href="?order_by=staff">담당자</a></th>
+                    <th><a class="order" href="?order_by=Membership_status">회원권 상태</a></th>
+                    <th><a class="order" href="?order_by=PT_status">PT 상태</a></th>
+                    <th>결제내역</th>
+                    <th>삭제</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% load el_pagination_tags %}
+                {% paginate 20 member_list %} <!-- 한페이지에 20개씩 표현 -->
+                {% for member in member_list %}
+                <tr>
+                    <td><a href="{% url "management:edit_member" member.id %}">{{ member }}</a></td>
+                    <td>{{ member.sex }}</td>
+                    <td>{{ member.birth }}</td>
+                    <td>{{ member.phone_num }}</td>
+                    <td>{{ member.start_date}}</td>
+                    <td>{{ member.staff }}</td>
+                    <td>{{ member.Membership_status }}</td>
+                    <td>{{ member.PT_status }}</td>
+                    <td><a href="{%url "management:payment_history" member.id %}">결제내역</a></td>
+                    <td><a class="btn btn-default" data-toggle="modal" data-target="#delete{{member.id}}">삭제</a></td>
+                </tr>
 
-            <!-- Modal -->
-            <div class="modal fade" id="delete{{member.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">삭제</h4>
-                  </div>
-                  <div class="modal-body">
-                    정말 회원을 삭제 하시겠습니까?
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">아니오</button>
-                    <a type="button" class="btn btn-danger" href="{% url "management:delete_member" member.id %}">예</a>
+                <!-- Modal -->
+                <div class="modal fade" id="delete{{member.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">삭제</h4>
+                      </div>
+                      <div class="modal-body">
+                        정말 회원을 삭제 하시겠습니까?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">아니오</button>
+                        <a type="button" class="btn btn-danger" href="{% url "management:delete_member" member.id %}">예</a>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
+            </tbody>
         </table>
         {% get_pages %}
         <div class='text-center' style='font-size: 11pt'>
@@ -68,9 +88,9 @@
     <div role="tabpanel" class="tab-pane fade in" id="staffs">
         <table class='table text-center'>
             <tr>
-                <th>이름</th>
-                <th>생년월일</th>
-                <th>팀</th>
+                <th><a class="order" href="?staff_order_by=username">이름</a></th>
+                <th><a class="order" href="?staff_order_by=birth">생년월일</a></th>
+                <th><a class="order" href="?staff_order_by=groups">팀</a></th>
                 <th>My Page</th>
                 <th>매출</th>
                 <th>삭제</th>

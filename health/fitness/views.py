@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, render_to_response
+from django.template.context import RequestContext
 from django.utils import timezone
 from django.utils.timezone import now
 from django.db.models import Sum
@@ -69,7 +70,8 @@ def date_add(request):
 
 
 def member_list(request):
-    members = Member.objects.all()
+    order_by = request.GET.get('order_by', 'name')
+    members = Member.objects.all().order_by(order_by)
     context = {
         'members' : members,
     }
@@ -89,6 +91,25 @@ def member_search(request):
         'q' : keyword,
     }
     return render(request, 'member_search.html', context)
+
+def ot_member_search(request):
+    # if request.is_ajax():
+    keyword = request.GET.get('q','') #검색 키워드
+    condition=(Q(name__icontains=keyword) | Q(phone_num__icontains=keyword))
+    search_member = Member.objects.filter(condition)#검색 조건 이름, 휴대번호
+
+    schedules = request.user.schedule.filter(~Q(title__icontains='OT')) #OT를 제외한 나의 스케줄
+    OT_schedules = request.user.schedule.filter(title__icontains='OT') #OT 스케줄
+    PT_members = request.user.PT_members.all() #나의 PT 회원들
+
+    context= {
+        'schedules':schedules,
+        'OT_schedules':OT_schedules,
+        'PT_members':PT_members,
+        'search_member' : search_member,
+        'q' : keyword,
+    }
+    return render(request, 'schedule.html', context)
 
 def member_detail(request, member_id):
     member = Member.objects.get(id=member_id)
@@ -202,7 +223,6 @@ def mypage(request, staff_id): # FC팀의 마이페이지
     # 이번달 나의 총 매출 - 이번달 나의 환불
     thismonth_members_pay_before = thismonth_members_pay
     thismonth_members_pay = thismonth_members_pay_before - this_personal_refund
-    # print(thismonth_members_pay)
     if thismonth_members_pay < 0:
         thismonth_members_pay = 0
 
@@ -302,14 +322,10 @@ def PT_mypage(request, staff_id): #피트니스의 마이페이지
     this_month = datetime.timedelta(date.month)
     thisweek_members = PT_members.filter(PT_registered_date__range=[start_week, end_week])
     thisweek_members_pay = thisweek_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00)
-    print(thisweek_members)
-    print(thisweek_members_pay)
     ####이번달####
     this_month_start = datetime.datetime(date.year, date.month, 1) #이번달의 1일
     thismonth_members = PT_members.filter(PT_registered_date__range=[this_month_start, date])
     thismonth_members_pay = thismonth_members.aggregate(Sum('PT_payment_amount')).get('PT_payment_amount__sum',0.00) if thismonth_members else 0
-    print(thismonth_members)
-    print(thismonth_members_pay)
 
     ###저번달
     if date.month == 1: #1월이면, 작년 12월 return
@@ -329,8 +345,8 @@ def PT_mypage(request, staff_id): #피트니스의 마이페이지
     this_tuition = int(0)
 
     team_members = User.objects.filter(groups__name='Fitness') #피트니스 팀 직원들
-    lastmonth_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=year).filter(start__month=last_month) #지난달에 pt받은 회원들
-    thismonth_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=date.year).filter(start__month=date.month) #이번달에 pt받은 회원들
+    lastmonth_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=year).filter(start__month=last_month).filter(~Q(title__icontains='SV')).filter(~Q(title__icontains='OT')) #지난달에 pt받은 회원들
+    thismonth_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=date.year).filter(start__month=date.month).filter(~Q(title__icontains='SV')).filter(~Q(title__icontains='OT')) #이번달에 pt받은 회원들
 
     for f in team_members:
         PT_members = f.PT_members.all()
@@ -397,7 +413,6 @@ def PT_mypage(request, staff_id): #피트니스의 마이페이지
     # 이번달 나의 총 매출 - 이번달 나의 환불
     thismonth_members_pay_before = thismonth_members_pay
     thismonth_members_pay = thismonth_members_pay_before - this_personal_refund
-    # print(thismonth_members_pay)
     if thismonth_members_pay < 0:
         thismonth_members_pay = 0
 
@@ -516,8 +531,8 @@ def Pilates_mypage(request, staff_id):
     this_tuition = int(0)
 
     team_members = User.objects.filter(groups__name='Pilates') #필라테스 팀 직원들
-    lastmonth_PT_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=year).filter(start__month=last_month).filter(GX=False) #지난달에 pt받은 회원들
-    thismonth_PT_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=date.year).filter(start__month=date.month).filter(GX=False) #이번달에 pt받은 회원들
+    lastmonth_PT_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=year).filter(start__month=last_month).filter(GX=False).filter(~Q(title__icontains='SV')).filter(~Q(title__icontains='OT')) #지난달에 pt받은 회원들
+    thismonth_PT_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=date.year).filter(start__month=date.month).filter(GX=False).filter(~Q(title__icontains='SV')).filter(~Q(title__icontains='OT')) #이번달에 pt받은 회원들
 
     lastmonth_GX_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=year).filter(start__month=last_month).filter(GX=True) #지난달 GX 갯수
     thismonth_GX_schedules = Schedule.objects.filter(Trainer=staff).filter(start__year=date.year).filter(start__month=date.month).filter(GX=True) #이번달 GX 갯수
@@ -586,7 +601,6 @@ def Pilates_mypage(request, staff_id):
     # 이번달 나의 총 매출 - 이번달 나의 환불
     thismonth_members_pay_before = thismonth_members_pay
     thismonth_members_pay = thismonth_members_pay_before - this_personal_refund
-    # print(thismonth_members_pay)
     if thismonth_members_pay < 0:
         thismonth_members_pay = 0
 
@@ -718,22 +732,26 @@ def Pilates_mypage(request, staff_id):
     return render(request, 'Pilates_mypage.html', context)
 
 def schedule(request): #스케줄 관리 페이지
-    schedules = request.user.schedule.all() #나의 스케줄
+    schedules = request.user.schedule.filter(~Q(title__icontains='OT')) #OT를 제외한 나의 스케줄
+    OT_schedules = request.user.schedule.filter(title__icontains='OT') #OT 스케줄
     PT_members = request.user.PT_members.all() #나의 PT 회원들
     date = datetime.date.today() #오늘 받기
     context = {
         'PT_members' : PT_members,
         'date' : date,
         'schedules' : schedules,
+        'OT_schedules' : OT_schedules,
     }
     return render(request, 'schedule.html', context)
 
 def PT_member_detail(request, PT_member_id):
     PT_member = Member.objects.get(id=PT_member_id)
+    schedules = Schedule.objects.filter(name=PT_member).filter(birth=PT_member.birth)
     member_history = History.objects.filter(user=PT_member).filter(birth=PT_member.birth) #이름과 생일 모두 일치하는 회원 기록만 불러오기
 
     context = {
         'PT_member' : PT_member,
+        'schedules' : schedules,
         'member_history' : member_history,
     }
     return render(request, 'PT_member_detail.html', context)
@@ -878,6 +896,31 @@ def search(request):
     }
     return render(request, 'search_result.html', context)
 
+def OT_schedule_add(request):
+    if request.is_ajax():
+        start_original = request.POST.get('start',None)
+        s1 = start_original.split()[1:5] #korean standard time을 datetimefield 형식에 맞추기 위해 split ['Jul', '06','2017','08:00:00']
+        s = ' '.join(s1) #split후 다시 합치기
+        start= datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S') #%T = %H:%M:%S
+        end = datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S')
+        title = request.POST.get('title',None)
+        member = Member.objects.get(id=request.POST.get('id')) #넘겨온 id의 회원 찾기
+
+        member.OT_used_session = member.OT_used_session + 1
+        member.save()
+
+        Schedule.objects.create(
+                Trainer = request.user,
+                name=member,
+                birth= member.birth,
+                title = title,
+                OT_used_session = member.OT_used_session,
+                start = start,
+                end = end
+                )
+        context={}
+        return HttpResponse(json.dumps(context), content_type='application/json')
+
 
 def schedule_add(request):
     if request.is_ajax():
@@ -954,27 +997,38 @@ def schedule_add(request):
     return HttpResponse(json.dumps(context), content_type='application/json')
 
 def schedule_delete(request, schedule_id):
+    print(schedule_id)
     schedule = Schedule.objects.get(id=schedule_id) #해당 스케줄찾기
+    member = schedule.name #해당 회원찾기
     if schedule.title == "GX":
-        schedule.delete()
-    else:
-        member = schedule.name #해당 회원 찾기
+        pass
+    elif 'SV' in schedule.title:
+        member.used_session = member.used_session+0 #세션삭제 없음
+
+    elif 'OT' in schedule.title:
+        member.OT_used_session = member.OT_used_session - 1
+        pass
+        # member.OT_used_session = member.OT_used_session - 1
+        # member.save()
+
+    else: #정식 PT
 
         succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(PT_registered_date=schedule.PT_registered_date).filter(start__gt=schedule.start).filter(~Q(title__icontains='SV')) #같은 회원권 스케줄중(OT가 아닌), 빠른 날짜가 있는지 찾는다. 큰쪽이 더 최신날짜
 
-        if 'SV' in schedule.title : #OT 버튼이라면
-                member.used_session = member.used_session+0 #세션삭제 없음
+        if succeeding_schedule.exists(): #현재 지우는 스케줄보다 뒤에 스케줄이 있다면
+            for s in succeeding_schedule.order_by('start'): #시간에 따른 오림차순
+                s.used_session = s.used_session - 1 #빠른세션들 사용된세션
+                s.save()
         else:
-            if succeeding_schedule.exists(): #현재 지우는 스케줄보다 뒤에 스케줄이 있다면
-                for s in succeeding_schedule.order_by('start'): #시간에 따른 오림차순
-                    s.used_session = s.used_session - 1 #빠른세션들 사용된세션
-                    s.save()
-            else:
-                pass
+            pass
 
-            member.used_session = member.used_session-1
-                #스케줄 삭제시 세션 횟수도 하나 삭제.
-            member.save() # +0 or -1 상태 저장한
-        schedule.delete() #스케줄 삭제
+        member.used_session = member.used_session-1
+            #스케줄 삭제시 세션 횟수도 하나 삭제.
+    member.save() # +0 or -1 상태 저장한
+
+    schedule.delete() #스케줄 삭제
 
     return redirect('schedule')
+
+def purchasing_application(request):
+    return render(request, 'purchasing_application.html')

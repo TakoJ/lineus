@@ -32,18 +32,24 @@ $(function(){
     $('#period_fitness').on('change', function(){
         var fitness_option = this.value;
         if(fitness_option == "m1"){
-            $('#payment_amount').val(B1);
+            $('#membership_amount').val(B1);
         }
         else if(fitness_option == 'm3'){
-            $('#payment_amount').val(B3);
+            $('#membership_amount').val(B3);
         }
         else if(fitness_option == 'm6'){
-            $('#payment_amount').val(B6);
+            $('#membership_amount').val(B6);
         }
         else if(fitness_option == 'm12'){
-            $('#payment_amount').val(B12);
+            $('#membership_amount').val(B12);
         }
 
+    });
+
+    $('#locker_amount').keyup(function(event){
+        membership_amount = $('#membership_amount').val();
+        locker_amount = $('#locker_amount').val();
+        $('#payment_amount').val(Number(membership_amount)+Number(locker_amount));
     });
     // var pilates_money1 = 800000;
     // var money1 = money.toLocaleString(); //3자리수마다 , (왠지모르겠으나 이거하면 폼 전송 실패)

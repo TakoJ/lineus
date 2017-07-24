@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Group
 from management.models import FC_Teamleader_Commission, FC_Personal_Commission, FC_Team_Commission, Fitness_Teamledaer_Commission, Fitness_Personal_Commission, Pilates_Teamleader_Commission,  Pilates_Commission, Pilates_GX_Basic, Pilates_GX_DependingNum, Pilates_PT
@@ -16,11 +16,28 @@ import json
 # Create your views here.
 
 def member_management(request):
-    staff_list = User.objects.all()
-    member_list = Member.objects.all()
+    order_by = request.GET.get('order_by', 'name')
+    staff_order_by = request.GET.get('staff_order_by', 'groups')
+    member_list = Member.objects.all().order_by(order_by)
+    staff_list = User.objects.all().order_by(staff_order_by)
     context = {
         'staff_list':staff_list,
         'member_list' : member_list,
+    }
+    return render(request, 'management/member_management.html', context)
+
+def member_search(request):
+
+    keyword = request.GET.get('q','') #검색 키워드
+    condition=(Q(name__icontains=keyword) | Q(phone_num__icontains=keyword))
+    search_member = Member.objects.filter(condition)#검색 조건 이름, 휴대번호
+
+    staff_order_by = request.GET.get('staff_order_by', 'groups')
+    staff_list = User.objects.all().order_by(staff_order_by)
+    context= {
+        'staff_list' : staff_list,
+        'member_list' : search_member,
+        'q' : keyword,
     }
     return render(request, 'management/member_management.html', context)
 
@@ -172,10 +189,20 @@ def delete_staff(request, staff_id):
 
 def schedule_management(request):
     staff_list = User.objects.all()
+    order_by = request.GET.get('order_by', 'groups')
+    staff_list = User.objects.all().order_by(order_by)
     context = {
         'staff_list':staff_list,
     }
     return render(request, 'management/schedule_management.html', context)
+
+def Fitness_schedule_management(request):
+    Fitness_list = User.objects.filter(groups__name='Fitness') # Fitness 팀 직원들
+    context = {
+        'staff_list':Fitness_list,
+    }
+    return render(request, 'management/schedule_management.html', context)
+
 
 def staff_schedule(request, staff_id):
     staff = User.objects.get(id=staff_id)

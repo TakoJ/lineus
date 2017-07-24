@@ -25,7 +25,7 @@ class Member(models.Model):
     sex = models.CharField(max_length=12, verbose_name='성별',null=True)
     registered_date = models.DateField(blank=True, default=timezone.now, verbose_name='등록일')
     start_date = models.DateField(default=timezone.now, blank=True, verbose_name='시작일')
-    end_date = models.DateField(blank=True, default=(datetime.now() + timedelta(days=30)), verbose_name='회원권종료일')
+    end_date = models.DateField(blank=True, verbose_name='회원권종료일')
     #Staff와 1:n 관계, staff삭제시 null값적용
     staff = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, related_name='members', on_delete=models.SET_NULL)
 
@@ -40,6 +40,8 @@ class Member(models.Model):
     cautions = models.CharField(max_length=128,blank=True,verbose_name='병력및주의사항')
     exercise_time = models.CharField(max_length=12, blank=True,verbose_name='운동시간대')
     visit_path = models.CharField(max_length=12, blank=True,verbose_name='방문경로')
+    membership_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='회원권 금액')
+    locker_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='락카 금액')
     payment_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='결제금액')
     payment_method = models.CharField(max_length=12,default='카드',verbose_name='결제방식')
     note = models.TextField(blank=True, null=True, verbose_name='비고란')
@@ -57,6 +59,7 @@ class Member(models.Model):
     period_PT = models.CharField(max_length=12,blank=True, null=True,verbose_name='강습기간')
     PT_registered_date = models.DateField(null=True, blank=True, verbose_name='PT등록일')
 
+    OT_used_session = models.IntegerField(blank=True, null=True, default=0, verbose_name='OT 횟수')
     used_session = models.IntegerField(blank=True, null=True, default=0, verbose_name='사용한 세션')
     re_registered = models.BooleanField(blank=True, default=False, verbose_name='PT재등록 여부')
     Membership_status = models.IntegerField(blank=True, null=True, default=1)#1이면 활성, 0면 비활성(만료). 환불시 2
@@ -89,7 +92,7 @@ class PaymentHistory(models.Model):
     division = models.CharField(max_length=12, null=True, verbose_name="회원권/Fitness/Pilates 구분") #회원권 = 'Membership'
     date = models.DateField(verbose_name='결제일')
     start_date = models.DateField(blank=True, verbose_name='시작일') #회원권 등록 환불때필요.
-    end_date = models.DateField(default=(datetime.now() + timedelta(days=30)), verbose_name='회원권종료일')
+    end_date = models.DateField(blank=True, verbose_name='회원권종료일')
     registered_session = models.IntegerField(null=True, blank=True,verbose_name='등록세션')
     payment_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='결제금액')
     status = models.IntegerField(default=1) #1이면 활성, 0면 비활성. end_date와 today비교해서 비활성. 환불시 2
@@ -106,6 +109,7 @@ class RefundHistory(models.Model):
     division = models.CharField(max_length=12, null=True,blank=True, verbose_name="회원권/Fitness/Pilates 구분") #회원권 = 'Membership', Fitness="Fitness", Pilates="Pilates"
     date = models.DateField(null=True, verbose_name='결제일')
     refund_date = models.DateField(verbose_name='환불일')
+    fees = models.DecimalField(max_digits=10,decimal_places=0 ,verbose_name='수수료')
     refund_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='환불금액')
 
 class History(models.Model): #pt history
@@ -118,7 +122,7 @@ class History(models.Model): #pt history
     PT_payment_method = models.CharField(max_length=12,blank=True ,verbose_name='PT결제방식')
     unitprice = models.DecimalField(max_digits=10, decimal_places=0, blank=True, null=True, verbose_name='1회세션단가')
     period_PT = models.CharField(max_length=12,blank=True, null=True,verbose_name='강습기간')
-    PT_registered_date = models.DateField(default=timezone.now, verbose_name='PT등록일')
+    PT_registered_date = models.DateField(blank=True, verbose_name='PT등록일')
     Num = models.IntegerField(default=0)
 
 
@@ -128,15 +132,16 @@ class Schedule(models.Model):
     title = models.CharField(max_length=12,blank=True,)
     name = models.ForeignKey(Member, null=True, verbose_name='회원이름')
     birth = models.DateField(null=True,blank=True,help_text='Ex) 1980-06-30',verbose_name='생년월일') #동명이인을 구별하기 위해 추가
-    PT_registered_date = models.DateField(default=timezone.now, null=True, blank=True, verbose_name='해당PT등록일')
+    PT_registered_date = models.DateField(null=True, blank=True, verbose_name='해당PT등록일')
     # 다른 pt등록과 구분하기 위해(즉 어떤 history인지)
     registered_session = models.CharField(max_length=24, null=True, blank=True,verbose_name='등록세션')
+    OT_used_session = models.IntegerField(blank=True, null=True, default=0, verbose_name='OT 횟수')
     used_session = models.IntegerField(blank=True, null=True, default=0, verbose_name='사용한 세션')
-    unitprice = models.DecimalField(max_digits=10, decimal_places=0, blank=True, null=True, verbose_name='1회세션단가')
+    unitprice = models.DecimalField(max_digits=10, decimal_places=0, blank=True, null=True, default=0, verbose_name='1회세션단가')
 
     #pilates GX
     GX = models.BooleanField(blank=True, default=False, verbose_name='GX 여부')
-    number = models.IntegerField(blank=True, null=True, default=1, verbose_name='GX명수')
+    number = models.IntegerField(blank=True, null=True, verbose_name='GX명수')
 
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(blank=True,null=True) #optional

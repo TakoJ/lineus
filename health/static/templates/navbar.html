@@ -50,12 +50,26 @@
                 <li><a href="{% url 'member_list' %}">회원 목록</a></li>
                 <li><a href="{% url 'register' %}">회원가입 폼</a></li>
                 <li><a href="{% url 'mypage' user.id  %}">FC의 나의 페이지</a></li>
+                <li><a href="{% url 'management:schedule_management' %}">PT 스케줄</a></li>
+                    {% if request.user.teamleader %}
+                        <li><a href="{% url 'purchasing_application' %}">물품 구입 신청서</a></li>
+                        {% else %}
+                    {% endif %}
                 {% else %}
                     <li><a href="{% url 'schedule' %}">스케줄 관리</a></li>
                     {% if request.user|has_group:"Fitness" %}
                     <li><a href="{% url 'PT_mypage' user.id  %}">Fitness의 나의 페이지</a></li>
+                        {% if request.user.teamleader %}
+                        <li><a href="{% url 'management:Fitness_schedule_management' %}">팀원들의 스케줄</a></li>
+                        <li><a href="{% url 'purchasing_application' %}">물품 구입 신청서</a></li>
+                        {% else %}
+                        {% endif %}
                     {% else %}
                     <li><a href="{% url 'Pilates_mypage' user.id %}">Pilates의 나의 페이지</a></li>
+                        {% if request.user.teamleader %}
+                        <li><a href="{% url 'purchasing_application' %}">물품 구입 신청서</a></li>
+                        {% else %}
+                        {% endif %}
                     {% endif %}
                 {% endif %}
              {% endif %}

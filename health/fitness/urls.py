@@ -7,6 +7,7 @@ urlpatterns= [
     url(r'^date_add/$', views.date_add, name='date_add'),
     url(r'^member_list/$', views.member_list, name='member_list'),
     url(r'^member_list/member_search/$', views.member_search, name='member_search'),
+    url(r'^member_list/ot_member_search/$', views.ot_member_search, name='ot_member_search'),
     url(r'^member_detail/(?P<member_id>\d+)/$', views.member_detail, name='member_detail'),
     url(r'^mypage/(?P<staff_id>\d+)/$', views.mypage, name='mypage'),
     url(r'^PT_mypage/(?P<staff_id>\d+)/$', views.PT_mypage, name='PT_mypage'),
@@ -19,6 +20,8 @@ urlpatterns= [
     url(r'^schedule/PT_register/search/$', views.search, name='search'),
     url(r'^schedule/PT_register/(?P<member_id>\d+)', views.PT_register_create, name='PT_register_create'),
     url(r'^schedule_add/$', views.schedule_add, name='schedule_add'),
+    url(r'^OT_schedule_add/$', views.OT_schedule_add, name='OT_schedule_add'),
     url(r'^schedule_delete/(?P<schedule_id>\d+)', views.schedule_delete, name='schedule_delete'),
+    url(r'^purchasing_application/$', views.purchasing_application, name='purchasing_application'),
 
 ]

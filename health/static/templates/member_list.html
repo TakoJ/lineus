@@ -13,30 +13,34 @@
     <hr/>
 
     <table class="table text-center">
-        <tr>
-            <th>성명</th>
-            <th>성별</th>
-            <th>생년월일</th>
-            <th>휴대번호</th>
-            <th>등록일</th>
-            <th>담당자</th>
-            <th>회원권 상태</th>
-            <th>PT 상태</th>
-        </tr>
-        {% load el_pagination_tags %}
-        {% paginate 20 members %} <!-- 한페이지에 20개씩 표현 -->
-        {% for m in members %}
-        <tr>
-            <td><a href="{% url "member_detail" m.id %}">{{ m.name}}</a></td>
-            <td>{{ m.sex}}</td>
-            <td>{{ m.birth}}</td>
-            <td>{{ m.phone_num }}</td>
-            <td>{{ m.start_date}}</td>
-            <td>{{ m.staff }}</td>
-            <td>{{ m.Membership_status }}</td>
-            <td>{{ m.PT_status }}</td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th><a class="order" href="?order_by=name">성명</a></th>
+                <th><a class="order" href="?order_by=sex">성별</a></th>
+                <th><a class="order" href="?order_by=birth">생년월일</a></th>
+                <th><a class="order" href="?order_by=phone_num">휴대번호</a></th>
+                <th><a class="order" href="?order_by=registered_date">등록일</a></th>
+                <th><a class="order" href="?order_by=staff">담당자</a></th>
+                <th><a class="order" href="?order_by=Membership_status">회원권 상태</a></th>
+                <th><a class="order" href="?order_by=PT_status">PT 상태</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% load el_pagination_tags %}
+            {% paginate 20 members %} <!-- 한페이지에 20개씩 표현 -->
+            {% for m in members %}
+            <tr>
+                <td><a href="{% url "member_detail" m.id %}">{{ m.name}}</a></td>
+                <td>{{ m.sex}}</td>
+                <td>{{ m.birth}}</td>
+                <td>{{ m.phone_num }}</td>
+                <td>{{ m.start_date}}</td>
+                <td>{{ m.staff }}</td>
+                <td>{{ m.Membership_status }}</td>
+                <td>{{ m.PT_status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
     {% get_pages %}
         <div class='text-center' style='font-size: 11pt'>
@@ -49,4 +53,5 @@
             </ul>
         </div>
 </div>
+
 {% endblock %}

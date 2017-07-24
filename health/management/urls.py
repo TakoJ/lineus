@@ -4,6 +4,7 @@ from management import views
 
 urlpatterns = [
     url(r'^member_management/$', views.member_management, name='member_management'),
+    url(r'^member_management/member_search/$', views.member_search, name='member_search'),
     url(r'^member_management/payment_history/(?P<member_id>\d+)/$', views.payment_history, name='payment_history'),
     url(r'^member_management/refund/(?P<history_id>\d+)/$', views.refund, name='refund'),
     url(r'^member_management/staff_mypage/(?P<staff_id>\d+)/$', views.staff_mypage, name='staff_mypage'),
@@ -19,4 +20,6 @@ urlpatterns = [
     url(r'^sales_management/$', views.sales_management, name='sales_management'),
     url(r'^set_today/$', views.set_today, name='set_today'),
     url(r'^sales_search/$', views.sales_search, name='sales_search'),
+    ##fitenss 스케줄
+    url(r'^Fitness_schedule_management/$', views.Fitness_schedule_management, name='Fitness_schedule_management'),
 ]

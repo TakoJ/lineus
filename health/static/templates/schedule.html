@@ -5,9 +5,12 @@
     <h2 class="text-center"><span class="header">{{user}}의 스케줄 관리</span></h2>
     <hr/>
 
+
    <script>
 
+
     $(document).ready(function() {
+
         var date = new Date();
         var d = date.getDate();
         var m = date.getMonth();
@@ -100,13 +103,13 @@
                     dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
 
                     success: function(response){
-                        alert("완료!");
+                        alert("스케줄 등록 완료");
                         $('#used_session'+id).html(response.used_session);
                         // 요청이 성공했을 경우 사용된 세션 +1
                     },
                     error:function(error){
                         // 요청이 실패했을 경우
-                        alert("실패다!");
+                        alert("등록 실패");
                     }
                 });
                 this.click=null;
@@ -138,13 +141,13 @@
                     dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
 
                     success: function(response){
-                        alert("완료!");
+                        alert("스케줄 등록 완료");
                         $('#used_session'+id).html(response.used_session);
                         // 요청이 성공했을 경우 사용된 세션 +1
                     },
                     error:function(error){
                         // 요청이 실패했을 경우
-                        alert("실패다!");
+                        alert("등록 실패");
                     }
                 });
 
@@ -177,16 +180,53 @@
                     dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
 
                     success: function(response){
-                        alert("완료!");
-                        // 요청이 성공했을 경우 사용된 세션 +1
+                        alert("스케줄 등록 완료");
                     },
                     error:function(error){
                         // 요청이 실패했을 경우
-                        alert("실패다!");
+                        alert("등록 실패");
                     }
                 });
 
-            }); //OT버튼클릭 종료
+            }); //GX버튼클릭 종료
+
+           $('.OT').unbind("click").bind("click", function(){
+                // jQuery.noConflict();
+                // $('#myModal').modal('show');
+                title = $(this).attr('name');
+                id = $(this).attr('id');
+                if (title) {
+                    calendar.fullCalendar('renderEvent',
+                        {
+                            title: title,
+                            start: start,
+                            end: end,
+                            allDay: allDay
+                        },
+
+                        true // make the event "stick"
+
+                    );
+                }
+
+                calendar.fullCalendar('unselect');
+                var allData = {'csrfmiddlewaretoken': '{{ csrf_token }}', "title":title, "start":start, "end":end, "id":id, };
+                $.ajax({
+                    url: "{% url 'OT_schedule_add' %}", // 통신할 url을 지정한다.
+                    type: "POST",
+                    data: allData, // 서버로 데이터를 전송할 때 이 옵션을 사용한다.
+                    dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
+
+                    success: function(response){
+                        alert("스케줄 등록 완료");
+                    },
+                    error:function(error){
+                        // 요청이 실패했을 경우
+                        alert("등록 실패");
+                    }
+                });
+
+           }); //GX버튼 끝
         },
 
 
@@ -245,6 +285,19 @@
                     allDay: false,
                     className: 'success',
                     url: "{% url 'schedule_delete' schedule.id %}"
+                    },
+                {% endfor %}
+                //OT 스케줄
+                {% for OT_schedule in OT_schedules %}
+                    {
+                    id : '{{OT_schedule.title}}',
+                    title: '{{OT_schedule.title}} ({{OT_schedule.OT_used_session}}/2)',
+                    start: new Date({{OT_schedule.get_year}},{{OT_schedule.get_month}},{{OT_schedule.get_day}},{{OT_schedule.get_hour}}+9,{{schedule.get_minute}}),//db에있는게 9시간 느리게 넘어와서  hour +9해줘야 제대로 적용됨.
+                    end: new Date({{OT_schedule.get_year}},{{OT_schedule.get_month}},{{OT_schedule.get_day}},{{OT_schedule.get_hour}}+10,{{schedule.get_minute}}),//1시간 단위이므로 end는 +10
+
+                    allDay: false,
+                    className: 'info',
+                    url: "{% url 'schedule_delete' OT_schedule.id %}"
                     },
                 {% endfor %}
             ],
@@ -324,8 +377,38 @@
         <div>
             {% if request.user|has_group:"Pilates" %}
              <a class="GX btn btn-default">GX</a>
+            {% else %}
             {% endif %}
         </div>
+
+        <div id="search" style="margin:0 auto;">
+            <form id="search" method="GET" action="{% url 'ot_member_search' %}">
+                <input type="text" class="q form-control search_web" placeholder="이름,휴대번호로 검색해보세요." name='q' value="{{ q }}" style="display:inline-block; width:70%">
+                <button type="submit" class="btn btn-info" value="검색" >검색</button>
+            </form>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <th>성명</th>
+                <th>성별</th>
+                <th>생년월일</th>
+                <th>OT 횟수</th>
+                <th>OT</th>
+            </thead>
+            <tbody>
+            {% for member in search_member %}
+            <tr>
+                <td>{{ member.name }}</td>
+                <td>{{ member.sex }}</td>
+                <td>{{ member.birth }}</td>
+                <td>{{ member.OT_used_session }}회</td>
+                <td><a id="{{member.id}}" class="OT btn btn-danger" name="{{member.name}}(OT)">OT</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <hr/>
         <div style="border:1px solid black; float: right;">
             <h4>나의 PT 회원</h4>
             {{PT_members.count}}명
@@ -351,10 +434,7 @@
                 </div>
                 {% endfor %}
             </div>
-
         </div>
-            <hr/>
-
 
         <hr/>
 
@@ -362,7 +442,64 @@
 
     </div>
 
+        <!-- <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">회원 검색</h4>
+              </div>
+              <div class="modal-body">
+                <div id="search" style="margin:0 auto;">
+                    <form id="search" method="GET" action="{% url 'ot_member_search' %}">
+                        <input type="text" class="form-control search_web" placeholder="이름,휴대번호로 검색해보세요." name='q' value="{{ q }}" style="display:inline-block; width:70%">
+                        <button type="submit" class="btn btn-info" value="검색" >검색</button>
+                    </form>
+                </div>
+                <table class="table table-striped col-sm-8 col-sm-offset-2" style="width:60%; margin-top:30px;">
+                        <th>성명</th>
+                        <th>성별</th>
+                        <th>생년월일</th>
+                        <th>PT 등록횟수</th>
+                    </thead>
+                    <tbody>
+                    {% for member in search_member %}
+                    <tr>
+                        <td>{{ member.name }}</td>
+                        <td>{{ member.sex }}</td>
+                        <td>{{ member.birth }}</td>
+                        <td>{{ member.registered_session }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
+<script type="text/javascript">
+    $('.ot_member_search').click(function(){
+        q = $('.q').val()  // input값의 name의 값을 가져온다.
+        alert(q)
+        $.ajax({
+            url: "{% url 'ot_member_search' %}", // 통신할 url을 지정한다.
+            data: { 'q':q,}, // 서버로 데이터를 전송할 때 이 옵션을 사용한다.
+            // dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
 
+            success: function(response){
+                // 요청이 성공했을 경우 좋아요/싫어요 개수 레이블 업데이트
+                alert("성공")
+            },
+            error:function(error){
+                // 요청이 실패했을 경우
+                alert(error+"SF")
+            }
+        });
+    })
 
+</script> -->
 {% endblock %}

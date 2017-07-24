@@ -13,7 +13,6 @@ class User(AbstractUser):
     pilates_GX = models.CharField(max_length=32, blank=True, null=True, help_text='필라테스 gx정책',verbose_name='필라테스 GX정책')
     pilates_PT = models.CharField(max_length=32, blank=True, null=True, help_text='필라테스 PT정책',verbose_name='필라테스 PT정책')
 
-
 class FC_Salary(models.Model):
     uid = models.IntegerField(null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='이름', related_name='FC_Salary')
