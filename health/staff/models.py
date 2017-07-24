@@ -109,8 +109,9 @@ class RefundHistory(models.Model):
     division = models.CharField(max_length=12, null=True,blank=True, verbose_name="회원권/Fitness/Pilates 구분") #회원권 = 'Membership', Fitness="Fitness", Pilates="Pilates"
     date = models.DateField(null=True, verbose_name='결제일')
     refund_date = models.DateField(verbose_name='환불일')
-    fees = models.DecimalField(max_digits=10,decimal_places=0 ,verbose_name='수수료')
-    refund_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='환불금액')
+    fees = models.DecimalField(max_digits=10,blank=True, null=True, decimal_places=0 ,verbose_name='수수료')
+    refund = models.DecimalField(max_digits=10,decimal_places=0, blank=True, null=True, default=0 ,verbose_name='환불금액')
+    refund_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='총합')
 
 class History(models.Model): #pt history
     user = models.ForeignKey(Member, max_length=12, verbose_name='성명', related_name='History') #ForeignKey로 하면 def __str__에서 오류 난다.
