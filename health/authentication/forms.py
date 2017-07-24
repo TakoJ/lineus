@@ -18,7 +18,7 @@ class StaffRegisterForm(UserCreationForm): #usercreation inheritance
         ('fix','고정된 비율') #현재 40%로 고정.
     ]
     TEAM_CHOICES=[('FC','FC'),
-                ('Fitenss','Fitness'),
+                ('Fitness','Fitness'),
                 ('Pilates','Pilates')]
     sex = forms.ChoiceField(choices=SEX_CHOICES, widget=forms.RadioSelect())
     email = forms.EmailField()
