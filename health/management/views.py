@@ -8,7 +8,7 @@ from django.contrib.auth.models import Group
 from management.models import FC_Teamleader_Commission, FC_Personal_Commission, FC_Team_Commission, Fitness_Teamledaer_Commission, Fitness_Personal_Commission, Pilates_Teamleader_Commission,  Pilates_Commission, Pilates_GX_Basic, Pilates_GX_DependingNum, Pilates_PT
 from authentication.models import User,FC_Salary, Fitness_Salary,Pilates_Salary
 from staff.models import Member,PaymentHistory, RefundHistory
-from management.forms import CustomUserChangeForm, EditForm, FC_TeamLeader_EditForm
+from management.forms import *
 from decimal import Decimal
 import datetime
 import json
@@ -246,7 +246,9 @@ def commission_management(request):
 
     return render(request, 'management/commission_management.html', context)
 
-def edit_commission(request, fc_teamleader_id):
+############커미션 수정
+
+def fc_teamleader_edit_com(request, fc_teamleader_id):
     commission = FC_Teamleader_Commission.objects.get(id=fc_teamleader_id)
 
     if request.method == 'POST':
@@ -264,6 +266,169 @@ def edit_commission(request, fc_teamleader_id):
     }
     return render(request, 'management/edit_commission.html', context)
 
+def fc_team_edit_com(request, fc_team_id):
+    commission = FC_Team_Commission.objects.get(id=fc_team_id)
+
+    if request.method == 'POST':
+        form = FC_Team_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = FC_Team_Commission.objects.get(id=fc_teamleader_id)
+        form = FC_Team_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+def fc_personal_edit_com(request, fc_team_id):
+    commission = FC_Personal_Commission.objects.get(id=fc_team_id)
+
+    if request.method == 'POST':
+        form = FC_Personal_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = FC_Personal_Commission.objects.get(id=fc_team_id)
+        form = FC_Personal_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+def fit_teamleader_edit_com(request, fit_teamleader_id):
+    commission = Fitness_Teamledaer_Commission.objects.get(id=fit_teamleader_id)
+
+    if request.method == 'POST':
+        form = Fit_TeamLeader_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = Fitness_Teamledaer_Commission.objects.get(id=fit_teamleader_id)
+        form = Fit_TeamLeader_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+def fit_team_edit_com(request, fit_team_id):
+    commission = Fitness_Personal_Commission.objects.get(id=fit_team_id)
+
+    if request.method == 'POST':
+        form = Fit_Personal_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = Fitness_Personal_Commission.objects.get(id=fit_team_id)
+        form = Fit_Personal_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+def pil_teamleader_edit_com(request, pil_teamleader_id):
+    commission = Pilates_Teamleader_Commission.objects.get(id=pil_teamleader_id)
+
+    if request.method == 'POST':
+        form = Pil_TeamLeader_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = Pilates_Teamleader_Commission.objects.get(id=pil_teamleader_id)
+        form = Pil_TeamLeader_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+def pil_team_edit_com(request, pil_team_id):
+    commission = Pilates_Commission.objects.get(id=pil_team_id)
+
+    if request.method == 'POST':
+        form = Pil_Team_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = Pilates_Commission.objects.get(id=pil_team_id)
+        form = Pil_Team_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+def pil_pt_edit_com(request, fix_id):
+    commission = Pilates_PT.objects.get(id=fix_id)
+
+    if request.method == 'POST':
+        form = Pil_PT_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = Pilates_PT.objects.get(id=fix_id)
+        form = Pil_PT_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+def pil_dependingnum_edit_com(request, d_id):
+    commission = Pilates_GX_DependingNum.objects.get(id=d_id)
+
+    if request.method == 'POST':
+        form = Pil_DependingNum_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = Pilates_GX_DependingNum.objects.get(id=d_id)
+        form = Pil_DependingNum_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+def pil_gx_basic_edit_com(request, b_id):
+    commission = Pilates_GX_Basic.objects.get(id=b_id)
+
+    if request.method == 'POST':
+        form = Pil_GX_basic_EditForm(request.POST, instance=commission)
+
+        if form.is_valid():
+            form.save()
+            return redirect('management:commission_management')
+    else:
+        commission = Pilates_GX_Basic.objects.get(id=b_id)
+        form = Pil_GX_basic_EditForm(instance=commission)
+
+    context = {
+        'form' : form,
+    }
+    return render(request, 'management/edit_commission.html', context)
+
+##커미션 수정 끝
 
 def sales_management(request):
     staff_list = User.objects.all()

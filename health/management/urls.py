@@ -16,7 +16,20 @@ urlpatterns = [
     url(r'^schedule_management/$', views.schedule_management, name='schedule_management'),
     url(r'^schedule_management/staff_schedule/(?P<staff_id>\d+)', views.staff_schedule, name="staff_schedule"),
     url(r'^commission_management/$', views.commission_management, name='commission_management'),
-    url(r'^commission_management/edit_commission/(?P<fc_teamleader_id>\d+)/$', views.edit_commission, name='edit_commission'),
+    ##커미션 수정
+    url(r'^commission_management/fc_teamleader_edit_com/(?P<fc_teamleader_id>\d+)/$', views.fc_teamleader_edit_com, name='fc_teamleader_edit_com'),
+    url(r'^commission_management/fc_team_edit_com/(?P<fc_team_id>\d+)/$', views.fc_team_edit_com, name='fc_team_edit_com'),
+    url(r'^commission_management/fc_personal_edit_com/(?P<fc_team_id>\d+)/$', views.fc_personal_edit_com, name='fc_personal_edit_com'),
+
+    url(r'^commission_management/fit_teamleader_edit_com/(?P<fit_teamleader_id>\d+)/$', views.fit_teamleader_edit_com, name='fit_teamleader_edit_com'),
+    url(r'^commission_management/fit_team_edit_com/(?P<fit_team_id>\d+)/$', views.fit_team_edit_com, name='fit_team_edit_com'),
+
+    url(r'^commission_management/pil_teamleader_edit_com/(?P<pil_teamleader_id>\d+)/$', views.pil_teamleader_edit_com, name='pil_teamleader_edit_com'),
+    url(r'^commission_management/pil_team_edit_com/(?P<pil_team_id>\d+)/$', views.pil_team_edit_com, name='pil_team_edit_com'),
+    url(r'^commission_management/pil_pt_edit_com/(?P<fix_id>\d+)/$', views.pil_pt_edit_com, name='pil_pt_edit_com'),
+    url(r'^commission_management/pil_dependingnum_edit_com/(?P<d_id>\d+)/$', views.pil_dependingnum_edit_com, name='pil_dependingnum_edit_com'),
+    url(r'^commission_management/pil_gx_basic_edit_com/(?P<b_id>\d+)/$', views.pil_gx_basic_edit_com, name='pil_gx_basic_edit_com'),
+    ##커미션 수정End
     url(r'^sales_management/$', views.sales_management, name='sales_management'),
     url(r'^set_today/$', views.set_today, name='set_today'),
     url(r'^sales_search/$', views.sales_search, name='sales_search'),
