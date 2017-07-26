@@ -375,7 +375,7 @@
 </div>
     <div class="text-center col-xs-3" style=" float:left; display: inline;">
         <div>
-            {% if request.user|has_group:"Pilates" %}
+            {% if request.user or staff|has_group:"Pilates" %}
              <a class="GX btn btn-default">GX</a>
             {% else %}
             {% endif %}
@@ -409,6 +409,7 @@
         </table>
 
         <hr/>
+        {% if request.user|has_group:"Fitness" %}
         <div style="border:1px solid black; float: right;">
             <h4>나의 PT 회원</h4>
             {{PT_members.count}}명
@@ -435,6 +436,36 @@
                 {% endfor %}
             </div>
         </div>
+        <!-- 필라테스 -->
+        {% elif request.user or staff|has_group:"Pilates" %}
+            <div style="border:1px solid black; float: right;">
+            <h4>나의 Pilates 회원</h4>
+            {{Pil_members.count}}명
+            <div class="my_PTmember" style="text-align: center;">
+                {% for PT_member in Pil_members %}
+                <div class="per_PTmember" style="float:left;">
+                    <a id="{{PT_member.id}}" class='SV btn btn-default' name="{{PT_member.name}}(SV)" style="float:left;">S/V</a>
+                    <div id="{{PT_member.id}}"  class="PT_member" style="display:inline-block; margin: 0 5px; float:left;">
+                        <span name="PT_member_name">{{PT_member.name}}</span>
+                        {%if PT_member.Pil_re_registered %} <!--재등록여부가 true면-->
+                        <p><span id="used_session{{PT_member.id}}">{{PT_member.Pil_used_session}}</span>/{{PT_member.Pil_registered_session}}+재</p>
+                        {% else %} <!--재등록여부가 false면-->
+                        <p><span id="used_session{{PT_member.id}}">{{PT_member.Pil_used_session}}</span>/{{PT_member.Pil_registered_session}}</p>
+                        {% endif %}
+                    </div>
+                    <a class='btn btn-info' href="{% url "PT_member_detail" PT_member.id %}" style="float:left;">상세정보</a>
+                    <a class='btn btn-info' href="{% url "PT_member_session_end" PT_member.id %}" style="float:left;">세션 종료</a>
+                    <div style="display:inline-block; float:left;">
+                        <form method="GET" action="">
+                        <a class="btn btn-default" href="{% url "PT_member_delete" PT_member.id %}">삭제</a>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        {% endif %}
 
         <hr/>
 

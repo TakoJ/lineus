@@ -150,4 +150,4 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 AUTH_USER_MODEL = 'authentication.User'
 
 # El_pagination settings
-EL_PAGINATION_DEFAULT_CALLABLE_ARROWS = True # 맨 앞, 맨 뒤로 가기
+EL_PAGINATION_DEFAULT_CALLABLE_ARROWS = True

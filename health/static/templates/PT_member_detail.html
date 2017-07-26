@@ -26,23 +26,47 @@
         <td>{{PT_member.start_date}} ~ {{PT_member.end_date}}</td>
     </tr>
     <tr>
+        <th colspan="2" class="danger">Fitness</th>
+    </tr>
+    <tr>
         <td>사용한 세션/등록세션</td>
         <td>{{PT_member.used_session}} / {{PT_member.registered_session}}회</td>
     </tr>
     <tr>
         <td>PT결제금액</td>
-        <td>{{PT_member.PT_payment_amount}}</td>
+        <td>{{PT_member.PT_payment_amount |intcomma}}원</td>
     </tr>
     <tr>
         <td>1회세션단가</td>
-        <td>{{PT_member.PT_unitprice}}</td>
+        <td>{{PT_member.PT_unitprice |intcomma}}원</td>
     </tr>
     <tr>
         <td>결제방식</td>
         <td>{{PT_member.PT_payment_method}}</td>
     </tr>
+    <tr>
+        <th colspan="2" class="danger">Pilates</th>
+    </tr>
+    <tr>
+        <td>사용한 세션/등록세션</td>
+        <td>{{PT_member.Pil_used_session}} / {{PT_member.Pil_registered_session}}회</td>
+    </tr>
+    <tr>
+        <td>PT결제금액</td>
+        <td>{{PT_member.Pil_payment_amount |intcomma}}원</td>
+    </tr>
+    <tr>
+        <td>1회세션단가</td>
+        <td>{{PT_member.Pil_unitprice |intcomma }}원</td>
+    </tr>
+    <tr>
+        <td>결제방식</td>
+        <td>{{PT_member.Pil_payment_method}}</td>
+    </tr>
 </tbody>
 </table>
+
+<hr/>
 
 <table class="table text-center">
     <tr>
@@ -70,7 +94,7 @@
 <table class='table text-center'>
 <thead>
     <tr>
-        <th colspan="6" class="info">PT등록 내역</th>
+        <th colspan="6" class="info">Fitness등록 내역</th>
     </tr>
     <tr>
         <th>No</th>
@@ -90,6 +114,34 @@
         <td>{{member_history.PT_payment_method}}</td>
         <td>{{member_history.PT_registered_date}}</td>
         <td>{{member_history.Trainer}}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+<table class='table text-center'>
+<thead>
+    <tr>
+        <th colspan="6" class="info">Pilates 등록 내역</th>
+    </tr>
+    <tr>
+        <th>No</th>
+        <th>등록세션</th>
+        <th>결제금액</th>
+        <th>결제방식</th>
+        <th>결제일</th>
+        <th>Trainer</th>
+    </tr>
+</thead>
+<tbody>
+    {% for member_history in member_pil_history %}
+    <tr>
+        <td>{{member_history.Num}}</td>
+        <td>{{member_history.Pil_registered_session}}</td>
+        <td>{{member_history.Pil_payment_amount |intcomma}}원</td>
+        <td>{{member_history.Pil_payment_method}}</td>
+        <td>{{member_history.Pil_registered_date}}</td>
+        <td>{{member_history.Pil_Trainer}}</td>
     </tr>
     {% endfor %}
 </tbody>

@@ -59,22 +59,22 @@ $(function(){
     $('#period_pilates').on('change', function(){
         var pilates_option = this.value;
         if(pilates_option == 'se2m1'){
-            $('#payment_amount').val(216000);
+            $('#membership_amount').val(216000);
         }
         else if(pilates_option == 'se3m1'){
-            $('#payment_amount').val(300000);
+            $('#membership_amount').val(300000);
         }
         else if(pilates_option == 'se2m3'){
-            $('#payment_amount').val(528000);
+            $('#membership_amount').val(528000);
         }
         else if(pilates_option == 'se3m3'){
-            $('#payment_amount').val(720000);
+            $('#membership_amount').val(720000);
         }
         else if(pilates_option == 'se2m6'){
-            $('#payment_amount').val(912000);
+            $('#membership_amount').val(912000);
         }
         else if(pilates_option == 'se3m6'){
-            $('#payment_amount').val(1224000);
+            $('#membership_amount').val(1224000);
         }
     });
 
@@ -90,22 +90,22 @@ $(function(){
 
         if(rating=='B'){
             if(both_option == 'se2m1'){
-                $('#payment_amount').val(286000);
+                $('#membership_amount').val(286000);
             }
             else if(both_option=='se3m1'){
-                $('#payment_amount').val(370000);
+                $('#membership_amount').val(370000);
             }
             else if(both_option=='se2m3'){
-                $('#payment_amount').val(570000);
+                $('#membership_amount').val(570000);
             }
             else if(both_option=='se3m3'){
-                $('#payment_amount').val(750000);
+                $('#membership_amount').val(750000);
             }
             else if(both_option=='se2m6'){
-                $('#payment_amount').val(2040000);
+                $('#membership_amount').val(2040000);
             }
             else if(both_option=='se3m6'){
-                $('#payment_amount').val(2760000);
+                $('#membership_amount').val(2760000);
             }
             else{
 
@@ -114,22 +114,22 @@ $(function(){
         }
         if(rating=='S'){
             if(both_option == 'se2m1'){
-                $('#payment_amount').val(316000);
+                $('#membership_amount').val(316000);
             }
             else if(both_option=='se3m1'){
-                $('#payment_amount').val(400000);
+                $('#membership_amount').val(400000);
             }
             else if(both_option=='se2m3'){
-                $('#payment_amount').val(660000);
+                $('#membership_amount').val(660000);
             }
             else if(both_option=='se3m3'){
-                $('#payment_amount').val(840000);
+                $('#membership_amount').val(840000);
             }
             else if(both_option=='se2m6'){
-                $('#payment_amount').val(2160000);
+                $('#membership_amount').val(2160000);
             }
             else if(both_option=='se3m6'){
-                $('#payment_amount').val(2880000);
+                $('#membership_amount').val(2880000);
             }
             else{
 

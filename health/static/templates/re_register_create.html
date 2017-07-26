@@ -13,31 +13,27 @@
     <tbody>
         <tr>
             <th>회원구분</th>
-            <td>신규</td>
+            <td>재등록</td>
         </tr>
         <tr>
             <th>성명*</th>
-            <td><input type="text" name="name" class="textinput form-control" required></td>
+            <td><input type="text" name="name" value="{{member.name}}" class="textinput form-control" required></td>
         </tr>
         <tr>
             <th>생년월일*</th>
-            <td><input type="date" name="birth" class="dateinput form-control" placeholder="Ex) 06/24/1980" required></td>
+            <td><input type="date" name="birth" class="dateinput form-control" value="{{member_birth}}" placeholder="Ex) 06/24/1980" required></td>
         </tr>
         <tr>
             <th>휴대번호*</th>
-            <td><input type="text" name="phone_num" class="textinput form-control" placeholder="Ex) 010-1234-1234" required></td>
+            <td><input type="text" name="phone_num" class="textinput form-control" value="{{ member.phone_num }}" placeholder="Ex) 010-1234-1234" required></td>
         </tr>
         <tr>
             <th>주소*</th>
-            <td><input type="text" name="address" class="textinput form-control" required></td>
+            <td><input type="text" name="address" class="textinput form-control" value="{{ member.address }}" required></td>
         </tr>
         <tr>
             <th>성별*</th>
-            <td><select name="sex" class="select form-control" required>
-                <option value="">-----</option>
-                <option value='남자'>남자</option>
-                <option value='여자'>여자</option>
-                </select></td>
+            <td><input type="text" name="sex" class="textinput form-control" value="{{ member.sex }}" required></td>
         </tr>
     <th colspan="2"><h3 class="text-center"><span style="padding:2px; border-bottom:2px solid green;">회원권 세부사항</span></h3>
     </th>

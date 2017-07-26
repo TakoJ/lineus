@@ -208,9 +208,12 @@ def staff_schedule(request, staff_id):
     staff = User.objects.get(id=staff_id)
     schedules = staff.schedule.all() #나의 스케줄
     PT_members = staff.PT_members.all() #나의 PT 회원들
+    Pil_members = staff.Pil_members.all() #나의 PT 회원들
     context = {
         'PT_members' : PT_members,
+        'Pil_members': Pil_members,
         'schedules' : schedules,
+        'staff' : staff,
     }
     return render(request, 'schedule.html', context)
 

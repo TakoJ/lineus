@@ -48,7 +48,12 @@
             {% else %}
                 {% if request.user|has_group:"FC" %}
                 <li><a href="{% url 'member_list' %}">회원 목록</a></li>
-                <li><a href="{% url 'register' %}">회원가입 폼</a></li>
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">회원가입 폼</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'register' %}">신규</a></li>
+                        <li><a href="{% url 're_register' %}">재등록</a></li>
+                    </ul>
+                </li>
                 <li><a href="{% url 'mypage' user.id  %}">FC의 나의 페이지</a></li>
                 <li><a href="{% url 'management:schedule_management' %}">PT 스케줄</a></li>
                     {% if request.user.teamleader %}

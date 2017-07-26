@@ -1,4 +1,5 @@
 {% extends "navbar.html" %}
+{% load user_tags %}
 {% block content %}
 <h2 class="text-center"><span class="header">PT 등록</span></h2>
 
@@ -23,7 +24,12 @@
         <td>{{ member.sex }}</td>
         <td>{{ member.birth }}</td>
         <td>{{ member.registered_session }}</td>
-        <td><a class="btn btn-default" href="{% url "PT_register_create" member.id %}">등록</a></td>
+        {% if request.user|has_group:"Fitness" %}
+            <td><a class="btn btn-default" href="{% url "PT_register_create" member.id %}">pt등록</a></td>
+            {% elif request.user|has_group:"Pilates" %}
+            <td><a class="btn btn-default" href="{% url "Pil_register_create" member.id %}">등록</a></td>
+            {% else %}
+        {% endif %}
     </tr>
     {% endfor %}
     </tbody>

@@ -1,0 +1,43 @@
+{% extends "navbar.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<h2 class="text-center"><span class="header">재등록 회원 검색</span></h2>
+
+<div class="container">
+    <div id="search" style="margin:0 auto;">
+        <form id="search" method="GET" action="{% url 're_register_search' %}">
+            <input type="text" class="form-control search_web" placeholder="이름,휴대번호로 검색해보세요." name='q' value="{{ q }}" style="display:inline-block; width:70%">
+            <button type="submit" class="btn btn-info" value="검색" >검색</button>
+        </form>
+    </div>
+    <hr/>
+
+    <table class="table text-center">
+        <tr>
+            <th>성명</th>
+            <th>성별</th>
+            <th>생년월일</th>
+            <th>휴대번호</th>
+            <th>회원권 시작일</th>
+            <th>회원권 종료일</th>
+            <th>담당자</th>
+            <th>회원권 상태</th>
+            <th>PT 상태</th>
+        </tr>
+        {% for m in search_member %}
+        <tr>
+            <td><a href="{% url "re_register_create" m.id %}">{{ m.name}}</a></td>
+            <td>{{ m.sex}}</td>
+            <td>{{ m.birth}}</td>
+            <td>{{ m.phone_num }}</td>
+            <td>{{ m.start_date}}</td>
+            <td>{{ m.end_date }}</td>
+            <td>{{ m.staff }}</td>
+            <td>{{ m.Membership_status }}</td>
+            <td>{{ m.PT_status }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+</div>
+{% endblock %}

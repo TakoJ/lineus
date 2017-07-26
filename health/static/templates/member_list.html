@@ -22,7 +22,8 @@
                 <th><a class="order" href="?order_by=registered_date">등록일</a></th>
                 <th><a class="order" href="?order_by=staff">담당자</a></th>
                 <th><a class="order" href="?order_by=Membership_status">회원권 상태</a></th>
-                <th><a class="order" href="?order_by=PT_status">PT 상태</a></th>
+                <th><a class="order" href="?order_by=PT_status">PT(Fitness)</a></th>
+                <th><a class="order" href="?order_by=Pil_status">PT(Pilates)</a></th>
             </tr>
         </thead>
         <tbody>
@@ -38,6 +39,7 @@
                 <td>{{ m.staff }}</td>
                 <td>{{ m.Membership_status }}</td>
                 <td>{{ m.PT_status }}</td>
+                <td>{{ m.Pil_status }}</td>
             </tr>
             {% endfor %}
         </tbody>

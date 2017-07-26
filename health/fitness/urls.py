@@ -4,6 +4,9 @@ from fitness import views
 urlpatterns= [
     url(r'^$', views.home, name='home'),
     url(r'^register/$', views.register, name='register'),
+    url(r'^re_register/$', views.re_register, name='re_register'),
+    url(r'^re_register_search/$', views.re_register_search, name='re_register_search'),
+    url(r'^re_register_create/(?P<member_id>\d+)/$', views.re_register_create, name='re_register_create'),
     url(r'^date_add/$', views.date_add, name='date_add'),
     url(r'^member_list/$', views.member_list, name='member_list'),
     url(r'^member_list/member_search/$', views.member_search, name='member_search'),
@@ -19,6 +22,7 @@ urlpatterns= [
     url(r'^schedule/PT_register/$', views.PT_register, name='PT_register'),
     url(r'^schedule/PT_register/search/$', views.search, name='search'),
     url(r'^schedule/PT_register/(?P<member_id>\d+)', views.PT_register_create, name='PT_register_create'),
+    url(r'^schedule/Pil_register/(?P<member_id>\d+)', views.Pil_register_create, name='Pil_register_create'),
     url(r'^schedule_add/$', views.schedule_add, name='schedule_add'),
     url(r'^OT_schedule_add/$', views.OT_schedule_add, name='OT_schedule_add'),
     url(r'^schedule_delete/(?P<schedule_id>\d+)', views.schedule_delete, name='schedule_delete'),
