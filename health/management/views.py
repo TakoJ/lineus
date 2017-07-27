@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.db.models import Sum, Q
+from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Group
 from management.models import FC_Teamleader_Commission, FC_Personal_Commission, FC_Team_Commission, Fitness_Teamledaer_Commission, Fitness_Personal_Commission, Pilates_Teamleader_Commission,  Pilates_Commission, Pilates_GX_Basic, Pilates_GX_DependingNum, Pilates_PT
@@ -67,15 +68,30 @@ def refund(request, history_id):
     if payment_history.division == "Membership":
         member.Membership_status = 2
         member.save()
-        remaining_period = (payment_history.end_date - today).days/(payment_history.end_date - payment_history.start_date).days
+        period = (payment_history.end_date - payment_history.start_date).days #총 이용 기간
+        remaining_period = (payment_history.end_date - today).days/(payment_history.end_date - payment_history.start_date).days #남은 기간
+        used_period = (today - payment_history.start_date).days  #사용한 일 수
 
-        refund_amount = payment_history.payment_amount * Decimal(0.9) * Decimal(remaining_period)
+
+        oneday_cost = payment_history.payment_amount / Decimal(period) # 하루이용료 = 전체금액/이용기간
+
+        fees = payment_history.payment_amount * Decimal(0.1) #위약금10%
+        used_amount = oneday_cost * Decimal(used_period) # 이용료 = 하루이용료 * 사용한 기간
+
+        total_utility_cost = fees + used_amount
+
+        refund_amount = payment_history.payment_amount - total_utility_cost
 
         RefundHistory.objects.create(
             payment = payment_history,
             division = "Membership",
             date = payment_history.date,
             refund_date = today, #오늘
+            fees = fees,
+            oneday_cost = oneday_cost,
+            used_period = used_period,
+            used_amount = used_amount,
+            total_utility_cost = total_utility_cost,
             refund_amount = refund_amount
         )
 
@@ -83,29 +99,49 @@ def refund(request, history_id):
         member.PT_status = 2
         member.save()
         remaining_session = (payment_history.registered_session - member.used_session )/payment_history.registered_session
-        refund_amount = payment_history.payment_amount * Decimal(0.9) * Decimal(remaining_session)
+        used_session= member.used_session /payment_history.registered_session
+
+        fees = payment_history.payment_amount * Decimal(0.1) #위약금10%
+        used_amount =  payment_history.payment_amount * Decimal(0.9) * Decimal(used_session) #이용료
+        total_utility_cost = fees + used_amount
+
+        #환급액 = 전체 금액 - 위약금-이용료
+        refund_amount = payment_history.payment_amount - total_utility_cost
 
         RefundHistory.objects.create(
             payment = payment_history,
             division = "Fitness",
             date = payment_history.date,
             refund_date = today, #오늘
+            fees = fees,
+            used_amount = used_amount,
+            total_utility_cost = total_utility_cost,
             refund_amount = refund_amount
         )
     elif payment_history.division =='Pilates':
-        member.PT_status = 2
+        member.Pil_status = 2
         member.save()
         remaining_session = (payment_history.registered_session - member.used_session )/payment_history.registered_session
-        refund_amount = payment_history.payment_amount * Decimal(0.9) * Decimal(remaining_session)
+        used_session= member.Pil_used_session /payment_history.registered_session
+
+        fees = payment_history.payment_amount * Decimal(0.1) #위약금10%
+        used_amount =  payment_history.payment_amount * Decimal(0.9) * Decimal(used_session) #이용료
+        total_utility_cost = fees + used_amount
+
+        refund_amount = payment_history.payment_amount - total_utility_cost
 
         RefundHistory.objects.create(
             payment = payment_history,
             division = "Pilates",
             date = payment_history.date,
             refund_date = today, #오늘
+            fees = fees,
+            used_amount = used_amount,
+            total_utility_cost = total_utility_cost,
             refund_amount = refund_amount
         )
-    return redirect('management:member_management')
+    url = reverse('management:payment_history', kwargs={'member_id': member.id})
+    return HttpResponseRedirect(url)
 
 
 def staff_mypage(request, staff_id):

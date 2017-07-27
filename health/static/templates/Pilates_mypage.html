@@ -141,24 +141,31 @@
 
 <hr/>
 <table class="table table-bordered">
-    <tr>
-        <th>이름</th>
-        <th>환불일</th>
-        <th>환불액</th>
-        <th>삭감 커미션</th>
-    </tr>
-    {% for refund in this_refund_list %}
-    <tr>
-        <td>{{refund.payment }}</td>
-        <td>{{ refund.date }}</td>
-        <td>{{refund.refund_date}}</td>
-        <td>{{refund.refund_amount |intcomma}}원</td>
-    </tr>
-    {% endfor %}
-    <tr>
-        <th colspan="3">환불 총합 </th>
-        <td>{{ this_personal_refund |intcomma}}원</td>
-    <tr>
+    <thead>
+        <tr>
+            <th colspan="4">이번달 환불</th>
+        </tr>
+        </thead>
+    <tobdy>
+        <tr>
+            <th>이름</th>
+            <th>환불일</th>
+            <th>환불액</th>
+            <th>삭감 커미션</th>
+        </tr>
+        {% for refund in this_refund_list %}
+        <tr>
+            <td>{{refund.payment }}</td>
+            <td>{{ refund.date }}</td>
+            <td>{{refund.refund_date}}</td>
+            <td>{{refund.refund_amount |intcomma}}원</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <th colspan="3">환불 총합 </th>
+            <td>{{ this_personal_refund |intcomma}}원</td>
+        </tr>
+    </tobdy>
 </table>
 
 </div>

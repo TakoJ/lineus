@@ -11,6 +11,7 @@ urlpatterns= [
     url(r'^member_list/$', views.member_list, name='member_list'),
     url(r'^member_list/member_search/$', views.member_search, name='member_search'),
     url(r'^member_list/ot_member_search/$', views.ot_member_search, name='ot_member_search'),
+    url(r'^member_list/member_history/(?P<member_id>\d+)/$', views.member_history, name='member_history'),
     url(r'^member_detail/(?P<member_id>\d+)/$', views.member_detail, name='member_detail'),
     url(r'^mypage/(?P<staff_id>\d+)/$', views.mypage, name='mypage'),
     url(r'^PT_mypage/(?P<staff_id>\d+)/$', views.PT_mypage, name='PT_mypage'),

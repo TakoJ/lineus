@@ -4,12 +4,20 @@
 <h2 class="text-center"><span class="header">회원 목록</span></h2>
 
 <div class="container">
+
+    <div  style="float:right;">
+    <p>1 = 활성, 0 = 만료 or 등록안함,  2 = 환불 </p>
+    </div>
+
     <div id="search" style="margin:0 auto;">
         <form id="search" method="GET" action="{% url 'member_search' %}">
             <input type="text" class="form-control search_web" placeholder="이름,휴대번호로 검색해보세요." name='q' value="{{ q }}" style="display:inline-block; width:70%">
             <button type="submit" class="btn btn-info" value="검색" >검색</button>
         </form>
     </div>
+
+
+
     <hr/>
 
     <table class="table text-center">
@@ -24,6 +32,7 @@
                 <th><a class="order" href="?order_by=Membership_status">회원권 상태</a></th>
                 <th><a class="order" href="?order_by=PT_status">PT(Fitness)</a></th>
                 <th><a class="order" href="?order_by=Pil_status">PT(Pilates)</a></th>
+                <th>등록 내역</th>
             </tr>
         </thead>
         <tbody>
@@ -40,6 +49,7 @@
                 <td>{{ m.Membership_status }}</td>
                 <td>{{ m.PT_status }}</td>
                 <td>{{ m.Pil_status }}</td>
+                <td><a href="{%url "member_history" m.id %}">등록 내역</a></td>
             </tr>
             {% endfor %}
         </tbody>

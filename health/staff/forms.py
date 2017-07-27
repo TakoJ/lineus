@@ -5,18 +5,18 @@ from functools import partial
 class RegisterForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ('name','birth','phone_num','address','sex','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','period_locker','cautions','exercise_time','visit_path','membership_amount','locker_amount','payment_amount','payment_method','note')
+        fields = ('name','birth','phone_num','address','sex','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','locker_start_date', 'locker_end_date','cautions','exercise_time','visit_path','membership_amount','locker_amount','payment_amount','payment_method','note')
 
 class Re_RegisterForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ('phone_num','address','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','period_locker','cautions','exercise_time','visit_path','membership_amount','locker_amount','payment_amount','payment_method','note')
+        fields = ('phone_num','address','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','locker_start_date', 'locker_end_date','cautions','exercise_time','visit_path','membership_amount','locker_amount','payment_amount','payment_method','note')
 
 class MembershipHistoryForm(forms.ModelForm):
     class Meta:
         model = MembershipHistory
         #registerform에서 name과 birth제외.
-        fields = ('phone_num','address','sex','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','period_locker','cautions','exercise_time','visit_path','membership_amount','locker_amount','payment_amount','payment_method','note')
+        fields = ('phone_num','address','sex','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','locker_start_date', 'locker_end_date','cautions','exercise_time','visit_path','membership_amount','locker_amount','payment_amount','payment_method','note')
 
 
 #Fitness 등록, 히스토리

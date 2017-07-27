@@ -437,7 +437,7 @@
             </div>
         </div>
         <!-- 필라테스 -->
-        {% elif request.user or staff|has_group:"Pilates" %}
+        {% elif request.user|has_group:"Pilates" %}
             <div style="border:1px solid black; float: right;">
             <h4>나의 Pilates 회원</h4>
             {{Pil_members.count}}명

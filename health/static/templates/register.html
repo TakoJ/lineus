@@ -122,8 +122,10 @@
             <option value="H">H</option>
             <option value="G">G</option>
             </select>
-            <strong>락카사용개월수</strong>
-            <input type="text" name="period_locker" class="numberinput my-control" placeholder='ex)1 / 락카를 쓰실분만 입력해주세요'>
+            <strong>락카 시작일</strong>
+            <input type="date" name="locker_start_date" class="locker_start_date dateinput my-control" value="{{today}}">
+            <strong> ~ 락카 종료일</strong>
+            <input type="date" name="locker_end_date" class="locker_end_date dateinput my-control">
         </td>
 
     </tr>

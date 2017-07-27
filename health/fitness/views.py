@@ -173,15 +173,31 @@ def ot_member_search(request):
     schedules = request.user.schedule.filter(~Q(title__icontains='OT')) #OT를 제외한 나의 스케줄
     OT_schedules = request.user.schedule.filter(title__icontains='OT') #OT 스케줄
     PT_members = request.user.PT_members.all() #나의 PT 회원들
+    Pil_members = request.user.Pil_members.all()
 
     context= {
         'schedules':schedules,
         'OT_schedules':OT_schedules,
         'PT_members':PT_members,
+        'Pil_members':Pil_members,
         'search_member' : search_member,
         'q' : keyword,
     }
     return render(request, 'schedule.html', context)
+
+def member_history(request, member_id):
+    order_by = request.GET.get('order_by', 'registered_date')
+
+    member = Member.objects.get(id=member_id)
+    Membership_History = MembershipHistory.objects.filter(user = member).order_by(order_by)
+    PT_History = History.objects.filter(user=member)
+    Pilates_History = Pil_History.objects.filter(user=member)
+    context = {
+        'Membership_History' : Membership_History,
+        'PT_History' : PT_History,
+        'Pilates_History' : Pilates_History,
+    }
+    return render(request, 'member_history.html', context)
 
 def member_detail(request, member_id):
     member = Member.objects.get(id=member_id)
@@ -820,7 +836,7 @@ def schedule(request): #스케줄 관리 페이지
 
 def PT_member_detail(request, PT_member_id):
     PT_member = Member.objects.get(id=PT_member_id)
-    schedules = Schedule.objects.filter(name=PT_member).filter(birth=PT_member.birth)
+    schedules = Schedule.objects.filter(name=PT_member).filter(birth=PT_member.birth).order_by('start')
     member_history = History.objects.filter(user=PT_member).filter(birth=PT_member.birth) #이름과 생일 모두 일치하는 회원 기록만 불러오기
     member_pil_history = Pil_History.objects.filter(user=PT_member).filter(birth=PT_member.birth) #이름과 생일 모두 일치하는 회원 기록만 불러오기
 
@@ -1042,27 +1058,16 @@ def OT_schedule_add(request):
 
 
 def schedule_add(request):
-    if request.is_ajax():
-        start_original = request.POST.get('start',None)
-        s1 = start_original.split()[1:5] #korean standard time을 datetimefield 형식에 맞추기 위해 split ['Jul', '06','2017','08:00:00']
-        s = ' '.join(s1) #split후 다시 합치기
-        start= datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S') #%T = %H:%M:%S
-        end = datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S')
+    if request.user.groups.filter(name__in=['Fitness']).exists():
+        if request.is_ajax():
+            start_original = request.POST.get('start',None)
+            s1 = start_original.split()[1:5] #korean standard time을 datetimefield 형식에 맞추기 위해 split ['Jul', '06','2017','08:00:00']
+            s = ' '.join(s1) #split후 다시 합치기
+            start= datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S') #%T = %H:%M:%S
+            end = datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S')
 
-        title = request.POST.get('title',None)
-        if 'GX' in title: # GX추가라면,
-            number = request.POST.get('number',None)
-            Schedule.objects.create(
-                Trainer = request.user,
-                title = title,
-                start = start,
-                end = end,
-                GX = True,
-                number = number
-                )
-            context={}
+            title = request.POST.get('title',None)
 
-        else:
             member = Member.objects.get(id=request.POST.get('id')) #넘겨온 id의 회원 찾기
 
             succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(PT_registered_date=member.PT_registered_date).filter(start__gt=start).filter(~Q(title__icontains='SV')) #뒤에 있는 스케줄들
@@ -1109,30 +1114,112 @@ def schedule_add(request):
                 'used_session':member.used_session,
             }
 
-    else:
-        context={
-            'used_session':member.used_session,
-        }
+        else:
+            context={
+                'used_session':member.used_session,
+            }
+
+    elif request.user.groups.filter(name__in=['Pilates']).exists():
+        if request.is_ajax():
+            start_original = request.POST.get('start',None)
+            s1 = start_original.split()[1:5] #korean standard time을 datetimefield 형식에 맞추기 위해 split ['Jul', '06','2017','08:00:00']
+            s = ' '.join(s1) #split후 다시 합치기
+            start= datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S') #%T = %H:%M:%S
+            end = datetime.datetime.strptime(s, '%b %d %Y %H:%M:%S')
+
+            title = request.POST.get('title',None)
+            if 'GX' in title: # GX추가라면,
+                number = request.POST.get('number',None)
+                Schedule.objects.create(
+                    Trainer = request.user,
+                    title = title,
+                    start = start,
+                    end = end,
+                    GX = True,
+                    number = number
+                    )
+                context={}
+
+            else:
+                member = Member.objects.get(id=request.POST.get('id')) #넘겨온 id의 회원 찾기
+
+                succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(PT_registered_date=member.PT_registered_date).filter(start__gt=start).filter(~Q(title__icontains='SV')) #뒤에 있는 스케줄들
+
+                if 'SV' in title: #OT 버튼이라면
+                    member.Pil_used_session = member.Pil_used_session+0 #세션추가 없음
+                    unitprice= 0
+                    used_session = member.Pil_used_session
+                else:
+                    if succeeding_schedule.exists(): #현재 추가하는 스케줄보다 뒤에 스케줄이 있다면
+                        first_succeeding_schedule = succeeding_schedule.latest('start') # 뒤에있는 것중, 가장 최근
+                        used_session = first_succeeding_schedule.used_session  # 현재 추가하는 스케줄의 사용된세션 = 가장 최근세션의 사용된세션
+
+                        for s in succeeding_schedule.order_by('start'): #시간에 따른 오림차순
+                            s.used_session = s.used_session + 1 #빠른세션들 사용된세션을 +1
+                            s.save()
+
+                        member.Pil_used_session = member.Pil_used_session+1 #사용된 세션1회추가
+                        unitprice = member.Pil_unitprice
+
+                        member.save() # +1 상태 저장
+
+                    else:  # 뒤에 스케줄이 없다면
+                        member.Pil_used_session = member.Pil_used_session+1 #사용된 세션1회추가
+                        unitprice = member.Pil_unitprice
+
+                        member.save() # +1 상태 저장
+
+                        used_session = member.Pil_used_session
+
+                Schedule.objects.create(
+                    Trainer=request.user,
+                    name = member,
+                    title = title, #받아온 data중 title 얻기
+                    start = start,
+                    end = end,
+                    birth= member.birth,
+                    PT_registered_date = member.PT_registered_date,
+                    used_session = used_session,
+                    registered_session = member.registered_session,
+                    unitprice = unitprice #수수료 10%제외한 단가
+                    )
+                context={
+                    'used_session':member.Pil_used_session,
+                }
+
+        else:
+            context={
+                'used_session':member.Pil_used_session,
+            }
+
     return HttpResponse(json.dumps(context), content_type='application/json')
 
 def schedule_delete(request, schedule_id):
-    print(schedule_id)
     schedule = Schedule.objects.get(id=schedule_id) #해당 스케줄찾기
     member = schedule.name #해당 회원찾기
     if schedule.title == "GX":
         pass
     elif 'SV' in schedule.title:
-        member.used_session = member.used_session+0 #세션삭제 없음
+        if request.user.groups.filter(name__in=['Fitness']).exists():
+            member.used_session = member.used_session+0 #세션삭제 없음
+        elif request.user.groups.filter(name__in=['Pilates']).exists():
+            member.Pil_used_session = member.Pil_used_session + 0
+        else:
+            pass
 
     elif 'OT' in schedule.title:
-        member.OT_used_session = member.OT_used_session - 1
-        pass
+        if request.user.groups.filter(name__in=['Fitness']).exists():
+            member.OT_used_session = member.OT_used_session - 1
+        elif request.user.groups.filter(name__in=['Pilates']).exists():
+            member.Pil_OT_used_session = member.Pil_OT_used_session - 1
+        else:
+            pass
         # member.OT_used_session = member.OT_used_session - 1
         # member.save()
 
     else: #정식 PT
 
-        succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(PT_registered_date=schedule.PT_registered_date).filter(start__gt=schedule.start).filter(~Q(title__icontains='SV')) #같은 회원권 스케줄중(OT가 아닌), 빠른 날짜가 있는지 찾는다. 큰쪽이 더 최신날짜
+        succeeding_schedule = Schedule.objects.filter(name=member).filter(birth=member.birth).filter(PT_registered_date=schedule.PT_registered_date).filter(start__gt=schedule.start).filter(~Q(title__icontains='OT')).filter(~Q(title__icontains='SV')) #같은 회원권 스케줄중(OT,SV가 아닌), 빠른 날짜가 있는지 찾는다. 큰쪽이 더 최신날짜
 
         if succeeding_schedule.exists(): #현재 지우는 스케줄보다 뒤에 스케줄이 있다면
             for s in succeeding_schedule.order_by('start'): #시간에 따른 오림차순
@@ -1141,8 +1228,14 @@ def schedule_delete(request, schedule_id):
         else:
             pass
 
-        member.used_session = member.used_session-1
+        if request.user.groups.filter(name__in=['Fitness']).exists():
+            member.used_session = member.used_session-1
             #스케줄 삭제시 세션 횟수도 하나 삭제.
+        elif request.user.groups.filter(name__in=['Pilates']).exists():
+            member.Pil_used_session = member.Pil_used_session-1
+        else:
+            pass
+
     member.save() # +0 or -1 상태 저장한
 
     schedule.delete() #스케줄 삭제
