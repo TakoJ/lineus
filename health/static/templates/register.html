@@ -115,17 +115,35 @@
         <input type="date" name="end_date" class="end_date dateinput my-control"></td>
     </tr>
     <tr>
-        <th>추가사항(락카)</th>
+        <th>추가사항(락카선택)</th>
         <td>
-            <select name="locker" class="select my-control" id="locker">
+            <select name="locker_type" class="select my-control">
             <option value="">---------</option>
             <option value="H">H</option>
             <option value="G">G</option>
+            <option value="Both">둘다</option>
             </select>
-            <strong>락카 시작일</strong>
-            <input type="date" name="locker_start_date" class="locker_start_date dateinput my-control" value="{{today}}">
-            <strong> ~ 락카 종료일</strong>
-            <input type="date" name="locker_end_date" class="locker_end_date dateinput my-control">
+        </td>
+    </tr>
+    <tr>
+    <th>
+        헬스락카
+    </th>
+    <td>
+        <strong>헬스락카 시작일</strong>
+            <input type="date" name="H_locker_start_date" class="H_locker_start_date dateinput my-control" value="{{today}}">
+            <strong> ~ 헬스락카 종료일</strong>
+            <input type="date" name="H_locker_end_date" class="H_locker_end_date dateinput my-control">
+    </td>
+
+    </tr>
+    <tr>
+        <th>골프락카</th>
+        <td>
+            <strong>골프락카 시작일</strong>
+            <input type="date" name="G_locker_start_date" class="G_locker_start_date dateinput my-control" value="{{today}}">
+            <strong> ~ 골프락카 종료일</strong>
+            <input type="date" name="G_locker_end_date" class="G_locker_end_date dateinput my-control">
         </td>
 
     </tr>
@@ -152,18 +170,37 @@
         </td>
     </tr>
     <tr>
-        <th>회원권 금액</th>
-        <td><input type="text" name="membership_amount" class="numberinput my-control" id="membership_amount" required> <strong>락카 금액</strong>
-            <input type="text" name="locker_amount" class="numberinput my-control" id="locker_amount" required> </td>
+        <th>회원권 금액*</th>
+        <td><input type="text" name="membership_amount" class="numberinput my-control" id="membership_amount" required></td>
     </tr>
     <tr>
-        <th> 총결제금액*</th>
-        <td><input type="text" name="payment_amount" class="numberinput form-control" id="payment_amount" required></td>
+    <th>헬스락카 금액</th>
+        <td>
+            <input type="number" name="H_locker_amount" class="numberinput my-control" id="H_locker_amount">
+            <strong>골프락카 금액</strong>
+            <input type="number" name="G_locker_amount" class="numberinput my-control" id="G_locker_amount">
+            <strong>총 락카 금액</strong>
+            <input type="text" name="locker_amount" class="numberinput my-control" id="locker_amount" >
+        </td>
     </tr>
     <tr>
-        <th>결제방식*</th>
+        <th>총결제금액</th>
+        <td><input type="text" name="payment_amount" class="numberinput form-control" id="payment_amount"></td>
+    </tr>
+    <tr>
+        <th>회원권 결제방식*</th>
         <td>
             <select name="payment_method" class="select form-control" id="payment_method">
+            <option value="카드">카드</option>
+            <option value="현금">현금</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th>락카 결제방식</th>
+        <td>
+            <select name="locker_payment_method" class="select form-control" id="locker_payment_method">
+            <option value="">---------</option>
             <option value="카드">카드</option>
             <option value="현금">현금</option>
             </select>

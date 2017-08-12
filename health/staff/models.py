@@ -35,14 +35,12 @@ class Member(models.Model):
     period_fitness = models.CharField(max_length=12,null=True, blank=True,verbose_name='피트니스기간', help_text='피트니스를 선택하신분만 선택해주세요.')
     period_pilates = models.CharField(max_length=12, null=True, blank=True,verbose_name='필라테스기간', help_text='필라테스를 선택하신분만 선택해주세요.')
     period_both = models.CharField(max_length=12, null=True, blank=True, verbose_name="피트니스+필라테스기간")
-    locker=models.CharField(max_length=12,blank=True,null=True,verbose_name='락카', help_text='락카를 쓰실 분만 선택해주세요. 헬스락카는 H, 골프락카는 G')
-    locker_start_date = models.DateField(blank=True, null=True, verbose_name='락카 시작일')
-    locker_end_date = models.DateField(blank=True, null=True, verbose_name='락카 종료일')
+    H_locker = models.IntegerField(blank=True,null=True,verbose_name='헬스락카')
+    G_locker = models.IntegerField(blank=True,null=True,verbose_name='골프락카')
     cautions = models.CharField(max_length=128,blank=True,verbose_name='병력및주의사항')
     exercise_time = models.CharField(max_length=12, blank=True,verbose_name='운동시간대')
     visit_path = models.CharField(max_length=12, blank=True,verbose_name='방문경로')
     membership_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='회원권 금액')
-    locker_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='락카 금액')
     payment_amount = models.DecimalField(max_digits=10,decimal_places=0, default=0 ,verbose_name='결제금액')
     payment_method = models.CharField(max_length=12,default='카드',verbose_name='결제방식')
     note = models.TextField(blank=True, null=True, verbose_name='비고란')
@@ -88,6 +86,18 @@ class Member(models.Model):
     def PT_unitprice(self):
         return int(self.unitprice * 10/11) #소수점없이 반환
 
+#추가 락카
+class Locker(models.Model):
+    user = models.ForeignKey(Member, null=True, verbose_name='회원', related_name='locker') #Member
+    locker_num = models.IntegerField(blank=True, null=True, verbose_name="락카 번호")
+    locker_type = models.CharField(max_length=12,blank=True,null=True,verbose_name='락카타입')
+    H_locker_start_date = models.DateField(blank=True, null=True, verbose_name='헬스락카 시작일')
+    H_locker_end_date = models.DateField(blank=True, null=True, verbose_name='헬스락카 종료일')
+    G_locker_start_date = models.DateField(blank=True, null=True, verbose_name='골프락카 시작일')
+    G_locker_end_date = models.DateField(blank=True, null=True, verbose_name='골프락카 종료일')
+    locker_amount = models.DecimalField(blank=True,max_digits=10, decimal_places=0, default=0 ,verbose_name='락카 금액')
+    locker_payment_method = models.CharField(blank=True, null=True, max_length=12, verbose_name='락카결제방식')
+
 class MembershipHistory(models.Model):
     user = models.ForeignKey(Member, null=True, verbose_name='회원', related_name='MembershipHistory') #Member
 
@@ -126,7 +136,8 @@ class MembershipHistory(models.Model):
 class PaymentHistory(models.Model):
     user = models.ForeignKey(Member, null=True, verbose_name='회원', related_name='PaymentHistory') #Member
     uid = models.IntegerField(null=True) #user의 id도 가져오자.
-    division = models.CharField(max_length=12, null=True, verbose_name="회원권/Fitness/Pilates 구분") #회원권 = 'Membership'
+    staff = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, related_name='payment_history', on_delete=models.SET_NULL)
+    division = models.CharField(max_length=12, null=True, verbose_name="회원권/Fitness/Pilates/Locker 구분") #회원권 = 'Membership'
     date = models.DateField(verbose_name='결제일')
     start_date = models.DateField(blank=True, verbose_name='시작일') #회원권 등록 환불때필요.
     end_date = models.DateField(blank=True, verbose_name='회원권종료일')

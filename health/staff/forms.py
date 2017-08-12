@@ -1,16 +1,32 @@
 from django import forms
-from .models import Member, MembershipHistory, PaymentHistory, History, Pil_History, Schedule
+from .models import Member, Locker, MembershipHistory, PaymentHistory, History, Pil_History, Schedule
 from functools import partial
 
 class RegisterForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ('name','birth','phone_num','address','sex','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','locker_start_date', 'locker_end_date','cautions','exercise_time','visit_path','membership_amount','locker_amount','payment_amount','payment_method','note')
+        fields = ('name','birth','phone_num','address','sex','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both','cautions','exercise_time','visit_path','membership_amount','payment_amount','payment_method','note')
 
 class Re_RegisterForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ('phone_num','address','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both', 'locker','locker_start_date', 'locker_end_date','cautions','exercise_time','visit_path','membership_amount','locker_amount','payment_amount','payment_method','note')
+        #name, birth, sex제외
+        fields = ('phone_num','address','registered_date', 'start_date', 'end_date', 'type_choice','rating','period_fitness','period_pilates','period_both','cautions','exercise_time','visit_path','membership_amount','payment_amount','payment_method','note')
+
+class LockerForm(forms.ModelForm):
+    class Meta:
+        model = Locker
+        fields = ('locker_type','H_locker_start_date','H_locker_end_date', 'G_locker_start_date','G_locker_end_date',  'locker_amount', 'locker_payment_method')
+
+class H_LockerForm(forms.ModelForm):
+    class Meta:
+        model = Locker
+        fields = ('locker_type','H_locker_start_date','H_locker_end_date', 'locker_amount', 'locker_payment_method')
+
+class G_LockerForm(forms.ModelForm):
+    class Meta:
+        model = Locker
+        fields = ('locker_type', 'G_locker_start_date','G_locker_end_date', 'locker_amount', 'locker_payment_method')
 
 class MembershipHistoryForm(forms.ModelForm):
     class Meta:

@@ -10,7 +10,7 @@ from .models import *
 from staff.models import *
 from management.models import *
 from authentication.models import User, FC_Salary
-from staff.forms import RegisterForm, Re_RegisterForm, MembershipHistoryForm, PT_RegisterForm,PT_Register_HistoryForm, Pil_RegisterForm, Pil_Register_HistoryForm
+from staff.forms import RegisterForm, Re_RegisterForm, LockerForm, H_LockerForm, G_LockerForm, MembershipHistoryForm, PT_RegisterForm,PT_Register_HistoryForm, Pil_RegisterForm, Pil_Register_HistoryForm
 from management.forms import EditForm
 from datetime import timedelta
 import datetime
@@ -27,11 +27,57 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST or None)
         form1 = MembershipHistoryForm(request.POST or None)
-        if form.is_valid() and form1.is_valid():
+        locker_form = LockerForm(request.POST or None)
+        if form.is_valid() and form1.is_valid() and locker_form.is_valid():
             instance =form.save(commit=False)
             instance.staff=request.user #staff를 현재 유저로 저장한 뒤
             instance.division = "신규"
             instance.save() #회원가입 저장
+
+            locker = locker_form.save(commit=False)
+            locker.user = instance
+
+            #락카를 선택했을때만 locker 모델 생성.
+            if locker.locker_type == "H":
+                locker.G_locker_start_date = None
+                locker.G_locker_end_date = None
+                locker.save()
+
+                instance.H_locker = locker.id
+                instance.save()
+
+            elif locker.locker_type == "G":
+                locker.H_locker_start_date = None
+                locker.H_locker_end_date = None
+                locker.save()
+
+                instance.G_locker = locker.id
+                instance.save()
+
+            elif locker.locker_type == "Both":
+                h = Locker.objects.create(
+                    user = instance,
+                    locker_type = 'H',
+                    H_locker_start_date = locker.H_locker_start_date,
+                    H_locker_end_date = locker.H_locker_end_date,
+                    locker_amount = request.POST.get('H_locker_amount',None),
+                    locker_payment_method = locker.locker_payment_method,
+                )
+
+                g = Locker.objects.create(
+                    user = instance,
+                    locker_type = 'G',
+                    G_locker_start_date = locker.G_locker_start_date,
+                    G_locker_end_date = locker.G_locker_end_date,
+                    locker_amount = request.POST.get('G_locker_amount',None),
+                    locker_payment_method = locker.locker_payment_method,
+                )
+
+                instance.H_locker = h.pk
+                instance.G_locker = g.pk
+                instance.save()
+            else:
+                pass
 
             history = form1.save(commit=False)
             history.user = instance
@@ -42,12 +88,59 @@ def register(request):
 
             PaymentHistory.objects.create(
                 user = instance,
+                staff = request.user,
                 division = 'Membership',
                 date = instance.registered_date,
                 start_date = instance.start_date,
                 end_date = instance.end_date,
-                payment_amount = instance.payment_amount
+                payment_amount = instance.membership_amount
             )
+
+            if locker.locker_type == "H" : #락카 선택시에만 결제내역 생성.
+                PaymentHistory.objects.create(
+                    user = instance,
+                    staff = request.user,
+                    division = 'H_Locker',
+                    date = locker.H_locker_start_date,
+                    start_date = locker.H_locker_start_date,
+                    end_date = locker.H_locker_end_date,
+                    payment_amount = request.POST.get('H_locker_amount',None)
+                )
+
+            elif locker.locker_type == "G":
+                PaymentHistory.objects.create(
+                    user = instance,
+                    staff = request.user,
+                    division = 'G_Locker',
+                    date = locker.G_locker_start_date,
+                    start_date = locker.G_locker_start_date,
+                    end_date = locker.G_locker_end_date,
+                    payment_amount = request.POST.get('G_locker_amount',None)
+                )
+
+            elif locker.locker_type == "Both":
+                PaymentHistory.objects.create(
+                    user = instance,
+                    staff = request.user,
+                    division = 'H_Locker',
+                    date = locker.H_locker_start_date,
+                    start_date = locker.H_locker_start_date,
+                    end_date = locker.H_locker_end_date,
+                    payment_amount = request.POST.get('H_locker_amount',None)
+                )
+
+                PaymentHistory.objects.create(
+                    user = instance,
+                    staff = request.user,
+                    division = 'G_Locker',
+                    date = locker.G_locker_start_date,
+                    start_date = locker.G_locker_start_date,
+                    end_date = locker.G_locker_end_date,
+                    payment_amount = request.POST.get('G_locker_amount',None)
+                )
+            else:
+                pass
+
 
             messages.info(request, '회원가입이 되었습니다.')
             return render(request,'home.html') #완료후 홈 페이지로 로딩
@@ -84,11 +177,57 @@ def re_register_create(request, member_id):
     if request.method == 'POST':
         form = Re_RegisterForm(request.POST, instance=member)
         history_form = MembershipHistoryForm(request.POST or None)
-        if form.is_valid() and history_form.is_valid():
+        locker_form = LockerForm(request.POST or None)
+        if form.is_valid() and history_form.is_valid() and locker_form.is_valid():
             instance =form.save(commit=False)
             instance.staff=request.user #staff를 현재 유저로 저장한 뒤
             instance.division = "재등록"
             instance.save()
+
+            locker = locker_form.save(commit=False)
+            locker.user = instance
+
+            #락카를 선택했을때만 locker 모델 생성.
+            if locker.locker_type == "H":
+                locker.G_locker_start_date = None
+                locker.G_locker_end_date = None
+                locker.save()
+
+                instance.H_locker = locker.id
+                instance.save()
+
+            elif locker.locker_type == "G":
+                locker.H_locker_start_date = None
+                locker.H_locker_end_date = None
+                locker.save()
+
+                instance.G_locker = locker.id
+                instance.save()
+
+            elif locker.locker_type == "Both":
+                h = Locker.objects.create(
+                    user = instance,
+                    locker_type = 'H',
+                    H_locker_start_date = locker.H_locker_start_date,
+                    H_locker_end_date = locker.H_locker_end_date,
+                    locker_amount = request.POST.get('H_locker_amount',None),
+                    locker_payment_method = locker.locker_payment_method,
+                )
+
+                g = Locker.objects.create(
+                    user = instance,
+                    locker_type = 'G',
+                    G_locker_start_date = locker.G_locker_start_date,
+                    G_locker_end_date = locker.G_locker_end_date,
+                    locker_amount = request.POST.get('G_locker_amount',None),
+                    locker_payment_method = locker.locker_payment_method,
+                )
+
+                instance.H_locker = h.pk
+                instance.G_locker = g.pk
+                instance.save()
+            else:
+                pass
 
             history = history_form.save(commit=False)
             history.division = "재등록"
@@ -99,12 +238,59 @@ def re_register_create(request, member_id):
 
             PaymentHistory.objects.create(
                 user = instance,
+                staff = request.user,
                 division = 'Membership',
                 date = instance.registered_date,
                 start_date = instance.start_date,
                 end_date = instance.end_date,
                 payment_amount = instance.payment_amount
             )
+
+            #락카 선택시에만 결제내역 생성.
+            if locker.locker_type == "H" :
+                PaymentHistory.objects.create(
+                    user = instance,
+                    staff = request.user,
+                    division = 'H_Locker',
+                    date = locker.locker_start_date,
+                    start_date = locker.locker_start_date,
+                    end_date = locker.locker_end_date,
+                    payment_amount = request.POST.get('H_locker_amount',None)
+                )
+
+            elif locker.locker_type == "G":
+                PaymentHistory.objects.create(
+                    user = instance,
+                    staff = request.user,
+                    division = 'G_Locker',
+                    date = locker.G_locker_start_date,
+                    start_date = locker.G_locker_start_date,
+                    end_date = locker.G_locker_end_date,
+                    payment_amount = request.POST.get('G_locker_amount',None)
+                )
+
+            elif locker.locker_type == "Both":
+                PaymentHistory.objects.create(
+                    user = instance,
+                    staff = request.user,
+                    division = 'H_Locker',
+                    date = locker.H_locker_start_date,
+                    start_date = locker.H_locker_start_date,
+                    end_date = locker.H_locker_end_date,
+                    payment_amount = request.POST.get('H_locker_amount',None),
+                )
+
+                PaymentHistory.objects.create(
+                    user = instance,
+                    staff = request.user,
+                    division = 'G_Locker',
+                    date = locker.G_locker_start_date,
+                    start_date = locker.G_locker_start_date,
+                    end_date = locker.G_locker_end_date,
+                    payment_amount = request.POST.get('G_locker_amount',None),
+                )
+            else:
+                pass
 
             messages.info(request, '회원 재등록이 되었습니다.')
             return render(request,'home.html') #완료후 홈 페이지로 로딩
@@ -208,24 +394,156 @@ def member_detail(request, member_id):
     }
     return render(request, 'member_detail.html', context)
 
+def add_locker(request, member_id):
+    member = Member.objects.get(id=member_id)
+    today = datetime.date.today() #오늘 받기
+
+    if request.method == 'POST':
+        locker_form = LockerForm(request.POST or None)
+        if locker_form.is_valid():
+            locker = locker_form.save(commit=False)
+            locker.user = member
+            locker.save() #락카 모델 생성
+
+            if locker.locker_type == "H":
+                locker.G_locker_start_date = None
+                locker.G_locker_end_date = None
+                locker.save()
+
+                member.H_locker = locker.id
+                member.save()
+
+                Locker.objects.create(
+                    user = member,
+                    locker_type = 'H',
+                    H_locker_start_date = locker.H_locker_start_date,
+                    H_locker_end_date = locker.H_locker_end_date,
+                    locker_amount = request.POST.get('H_locker_amount',None),
+                    locker_payment_method = locker.locker_payment_method,
+                )
+
+            elif locker.locker_type == "G":
+                locker.H_locker_start_date = None
+                locker.H_locker_end_date = None
+                locker.save()
+
+                member.G_locker = locker.id
+                member.save()
+
+                Locker.objects.create(
+                    user = member,
+                    locker_type = 'G',
+                    G_locker_start_date = locker.G_locker_start_date,
+                    G_locker_end_date = locker.G_locker_end_date,
+                    locker_amount = request.POST.get('G_locker_amount',None),
+                    locker_payment_method = locker.locker_payment_method,
+                )
+
+            elif locker.locker_type == "Both":
+                h = Locker.objects.create(
+                    user = member,
+                    locker_type = 'H',
+                    H_locker_start_date = locker.H_locker_start_date,
+                    H_locker_end_date = locker.H_locker_end_date,
+                    locker_amount = request.POST.get('H_locker_amount',None),
+                    locker_payment_method = locker.locker_payment_method,
+                )
+
+                g = Locker.objects.create(
+                    user = member,
+                    locker_type = 'G',
+                    G_locker_start_date = locker.G_locker_start_date,
+                    G_locker_end_date = locker.G_locker_end_date,
+                    locker_amount = request.POST.get('G_locker_amount',None),
+                    locker_payment_method = locker.locker_payment_method,
+                )
+
+                member.H_locker = h.pk
+                member.G_locker = g.pk
+                instance.save()
+            else:
+                pass
+
+            #결제내역 생성.
+            if locker.locker_type == "H" :
+                PaymentHistory.objects.create(
+                    user = member,
+                    staff = request.user,
+                    division = 'H_Locker',
+                    date = locker.H_locker_start_date,
+                    start_date = locker.H_locker_start_date,
+                    end_date = locker.H_locker_end_date,
+                    payment_amount = request.POST.get('H_locker_amount',None)
+                )
+
+            elif locker.locker_type == "G":
+                PaymentHistory.objects.create(
+                    user = member,
+                    staff = request.user,
+                    division = 'G_Locker',
+                    date = locker.G_locker_start_date,
+                    start_date = locker.G_locker_start_date,
+                    end_date = locker.G_locker_end_date,
+                    payment_amount = request.POST.get('G_locker_amount',None)
+                )
+
+            elif locker.locker_type == "Both":
+                PaymentHistory.objects.create(
+                    user = member,
+                    staff = request.user,
+                    division = 'H_Locker',
+                    date = locker.H_locker_start_date,
+                    start_date = locker.H_locker_start_date,
+                    end_date = locker.H_locker_end_date,
+                    payment_amount = request.POST.get('H_locker_amount',None),
+                )
+
+                PaymentHistory.objects.create(
+                    user = member,
+                    staff = request.user,
+                    division = 'G_Locker',
+                    date = locker.G_locker_start_date,
+                    start_date = locker.G_locker_start_date,
+                    end_date = locker.G_locker_end_date,
+                    payment_amount = request.POST.get('G_locker_amount',None),
+                )
+            else:
+                pass
+
+            messages.info(request, '회원가입이 되었습니다.')
+            return redirect('member_list')
+
+    else:
+        locker_form = LockerForm()
+
+
+    context = {
+        'member':member,
+        'locker_form':locker_form,
+        'today': str(today),
+    }
+    return render(request, 'add_locker.html', context)
+
 def mypage(request, staff_id): # FC팀의 마이페이지
     thismonth_members_num = int(0)
     thismonth_members_pay = int(0)
     staff = User.objects.get(id=staff_id)
-    members = staff.history_members.all() #memberhistory의 staff의 related_name='history_members'
+    members = staff.payment_history.all() #memberhistory의 staff의 related_name='history_members'
+    # person = staff.payment_history.filter(division='회원권')
+    # locker = staff.payment_history.filter(division='Locker')
     date = datetime.date.today() #오늘 받기
     #####오늘#####
-    today_members = members.filter(registered_date=date) #오늘 등록한 회원
+    today_members = members.filter(date=date) #오늘 등록한 회원
     today_members_pay = today_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     #####이번주####
     start_week = date- datetime.timedelta(date.weekday()) #이번주(월요일시작)
     end_week = start_week + datetime.timedelta(6) #월요일 + 6 (일요일)
     this_month = datetime.timedelta(date.month)
-    thisweek_members = members.filter(registered_date__range=[start_week, end_week])
+    thisweek_members = members.filter(date__range=[start_week, end_week])
     thisweek_members_pay = thisweek_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00)
     ####이번달####
     this_month_start = datetime.datetime(date.year, date.month, 1)
-    thismonth_members = members.filter(registered_date__range=[this_month_start, date])
+    thismonth_members = members.filter(date__range=[this_month_start, date])
     thismonth_members_pay = thismonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if thismonth_members else 0
 
     ###저번달
@@ -236,7 +554,7 @@ def mypage(request, staff_id): # FC팀의 마이페이지
         year = date.year
         last_month = date.month-1
 
-    lastmonth_members = members.filter(registered_date__year=year).filter(registered_date__month=last_month)
+    lastmonth_members = members.filter(date__year=year).filter(date__month=last_month)
     lastmonth_members_pay = lastmonth_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if lastmonth_members else 0
     ########커미션#########
     last_team_sales_before = int(0)
@@ -245,12 +563,12 @@ def mypage(request, staff_id): # FC팀의 마이페이지
     team_members = User.objects.filter(groups__name='FC') #FC 팀 직원들
 
     for f in team_members:
-        members = f.history_members.all()
-        last_members = members.filter(registered_date__year=year).filter(registered_date__month=last_month) #지난달 등록한 회원들
+        members = f.payment_history.all()
+        last_members = members.filter(date__year=year).filter(date__month=last_month) #지난달 등록한 회원들
         members_pay = last_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if last_members else 0 #Suspect some of members is None
         last_team_sales_before = last_team_sales_before + members_pay #저번달 팀 총 매출
 
-        this_members = members.filter(registered_date__year=year).filter(registered_date__month=date.month) #이번달 등록한 회원들
+        this_members = members.filter(date__year=year).filter(date__month=date.month) #이번달 등록한 회원들
         this_members_pay = this_members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if this_members else 0 #Suspect some of members is None
         this_team_sales_before = this_team_sales_before + this_members_pay # 이번달 팀 총 매출
 
@@ -937,6 +1255,7 @@ def PT_register_create(request, member_id):
 
             PaymentHistory.objects.create( #결제내역
                 user = member,
+                staff = request.user,
                 division = 'Fitness',
                 date = member.PT_registered_date,
                 start_date = member.start_date,
@@ -996,6 +1315,7 @@ def Pil_register_create(request, member_id):
 
             PaymentHistory.objects.create( #결제내역
                 user = member,
+                staff = request.user,
                 division = 'Pilates',
                 date = datetime.date.today(), #오늘,
                 start_date = member.start_date,
@@ -1054,7 +1374,7 @@ def OT_schedule_add(request):
                 end = end
                 )
         context={}
-        return HttpResponse(json.dumps(context), content_type='application/json')
+    return HttpResponse(json.dumps(context), content_type='application/json')
 
 
 def schedule_add(request):

@@ -8,11 +8,12 @@ from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Group
 from management.models import FC_Teamleader_Commission, FC_Personal_Commission, FC_Team_Commission, Fitness_Teamledaer_Commission, Fitness_Personal_Commission, Pilates_Teamleader_Commission,  Pilates_Commission, Pilates_GX_Basic, Pilates_GX_DependingNum, Pilates_PT
 from authentication.models import User,FC_Salary, Fitness_Salary,Pilates_Salary
-from staff.models import Member,PaymentHistory, RefundHistory
+from staff.models import Member,PaymentHistory, RefundHistory, Schedule
 from management.forms import *
 from decimal import Decimal
 import datetime
 import json
+from collections import OrderedDict
 
 # Create your views here.
 
@@ -65,18 +66,18 @@ def refund(request, history_id):
     payment_history.save()
     today = datetime.date.today()
 
+    period = (payment_history.end_date - payment_history.start_date).days #총 이용 기간
+    remaining_period = (payment_history.end_date - today).days/(payment_history.end_date - payment_history.start_date).days #남은 기간
+    used_period = (today - payment_history.start_date).days  #사용한 일 수
+
+    oneday_cost = payment_history.payment_amount / Decimal(period) # 하루이용료 = 전체금액/이용기간
+
+    fees = payment_history.payment_amount * Decimal(0.1) #위약금10%
+    used_amount = oneday_cost * Decimal(used_period) # 이용료 = 하루이용료 * 사용한 기간
+
     if payment_history.division == "Membership":
         member.Membership_status = 2
         member.save()
-        period = (payment_history.end_date - payment_history.start_date).days #총 이용 기간
-        remaining_period = (payment_history.end_date - today).days/(payment_history.end_date - payment_history.start_date).days #남은 기간
-        used_period = (today - payment_history.start_date).days  #사용한 일 수
-
-
-        oneday_cost = payment_history.payment_amount / Decimal(period) # 하루이용료 = 전체금액/이용기간
-
-        fees = payment_history.payment_amount * Decimal(0.1) #위약금10%
-        used_amount = oneday_cost * Decimal(used_period) # 이용료 = 하루이용료 * 사용한 기간
 
         total_utility_cost = fees + used_amount
 
@@ -140,6 +141,46 @@ def refund(request, history_id):
             total_utility_cost = total_utility_cost,
             refund_amount = refund_amount
         )
+    elif payment_history.division == 'H_Locker':
+        member.H_locker = None
+        member.save()
+
+        total_utility_cost = fees + used_amount
+        refund_amount = payment_history.payment_amount - total_utility_cost
+
+        RefundHistory.objects.create(
+            payment = payment_history,
+            division = "H_Locker",
+            date = payment_history.date,
+            refund_date = today, #오늘
+            fees = fees,
+            oneday_cost = oneday_cost,
+            used_period = used_period,
+            used_amount = used_amount,
+            total_utility_cost = total_utility_cost,
+            refund_amount = refund_amount
+        )
+    elif payment_history.division == 'G_Locker':
+        member.G_locker = None
+        member.save()
+
+        total_utility_cost = fees + used_amount
+        refund_amount = payment_history.payment_amount - total_utility_cost
+
+        RefundHistory.objects.create(
+            payment = payment_history,
+            division = "G_Locker",
+            date = payment_history.date,
+            refund_date = today, #오늘
+            fees = fees,
+            oneday_cost = oneday_cost,
+            used_period = used_period,
+            used_amount = used_amount,
+            total_utility_cost = total_utility_cost,
+            refund_amount = refund_amount
+        )
+
+
     url = reverse('management:payment_history', kwargs={'member_id': member.id})
     return HttpResponseRedirect(url)
 
@@ -220,8 +261,6 @@ def delete_staff(request, staff_id):
     staff = User.objects.get(id=staff_id)
     staff.delete()
     return redirect('management:member_management')
-
-
 
 def schedule_management(request):
     staff_list = User.objects.all()
@@ -480,17 +519,18 @@ def sales_management(request):
 
 def set_today(request):
     if request.is_ajax():
-        startdate = datetime.date.today()
-        enddate = datetime.date.today()
+        today = datetime.date.today().strftime('%Y-%m-%d')
 
         context = {
-            'startdate' : startdate.strftime('%Y-%m-%d'),
-            'enddate' : enddate.strftime('%Y-%m-%d'),
+            'startdate' : today,
+            'enddate' : today,
+            'search_date' : today,
         }
     else:
         context = {
-            'startdate' : datetime.date.today().strftime('%Y-%m-%d'),
-            'enddate' : datetime.date.today().strftime('%Y-%m-%d')
+            'startdate' : today,
+            'enddate' : today,
+            'search_date':today,
         }
     return HttpResponse(json.dumps(context), content_type='application/json')
 
@@ -509,8 +549,8 @@ def sales_search(request):
     if team_choice =='FC':
         team_members = User.objects.filter(groups__name='FC') # FC 팀 직원들
         for f in team_members:
-            FC_members = f.members.all()
-            members = FC_members.filter(start_date__range=[startdate, enddate])
+            FC_members = f.payment_history.all() #결제내역 받아오기.
+            members = FC_members.filter(date__range=[startdate, enddate])
             members_pay = members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if members else 0 # 회원들의 결제금액 합
 
             total = total + members_pay
@@ -553,8 +593,8 @@ def sales_search(request):
         Pilates_list = User.objects.filter(groups__name='Pilates') # Pilates 팀 직원들
 
         for fc in fc_list:
-            FC_members = fc.members.all()
-            members = FC_members.filter(start_date__range=[startdate, enddate])
+            FC_members = fc.payment_history.all() #결제내역 받아오기.
+            members = FC_members.filter(date__range=[startdate, enddate])
             fc_members_pay = members.aggregate(Sum('payment_amount')).get('payment_amount__sum',0.00) if members else 0
             fc_total = fc_total + fc_members_pay
             data1 = {'fc':fc, "fc_members_pay" : fc_members_pay}
@@ -597,3 +637,115 @@ def sales_search(request):
         }
     return render(request, 'management/sales_management.html', context)
 
+
+def fitness_daily_schedule(request):
+    today = datetime.date.today()
+    Fitness_list = User.objects.filter(groups__name='Fitness') # Fitness 팀 직원들
+    schedules= Schedule.objects.none()
+    trainer_dict = OrderedDict()
+
+    for f in Fitness_list:
+        trainer_dict[str(f)] = {'name' : f, 'hour_21':'', 'hour_22':'', 'hour_23':'', 'hour_0':'', 'hour_1':'','hour_2':'','hour_3':'','hour_4':'','hour_5':'','hour_6':'','hour_7':'','hour_8':'','hour_9':'','hour_10':'','hour_11':'','hour_12':'','hour_13':'','hour_14':'',}
+
+        sc = f.schedule.filter(start__year=today.year).filter(start__month = today.month).filter(start__day = today.day) #오늘
+        schedules |= sc
+
+    for sc in schedules:
+        trainer_dict[str(sc.Trainer)]['hour_'+str(sc.start.hour)] = sc.title
+
+    trainer_dict = trainer_dict.items()
+
+
+    context = {
+        'Fitness_list':Fitness_list,
+        'trainer_dict' : trainer_dict,
+        'search_date' : datetime.date.today()
+    }
+    return render(request, 'management/fitness_daily_schedule.html', context)
+
+def fitness_daily_schedule_search(request):
+
+    all_schedules = Schedule.objects.all()
+    Fitness_list = User.objects.filter(groups__name='Fitness') # Fitness 팀 직원들
+
+    search_date1 = request.GET.get('search_date','') #날짜 얻기
+    search_date= datetime.datetime.strptime(search_date1, '%Y-%m-%d')
+
+    schedules= Schedule.objects.none()
+    trainer_dict = OrderedDict()
+
+    for f in Fitness_list:
+        trainer_dict[str(f)] = {'name' : f, 'hour_21':'', 'hour_22':'', 'hour_23':'', 'hour_0':'', 'hour_1':'','hour_2':'','hour_3':'','hour_4':'','hour_5':'','hour_6':'','hour_7':'','hour_8':'','hour_9':'','hour_10':'','hour_11':'','hour_12':'','hour_13':'','hour_14':'',}
+
+        sc = f.schedule.filter(start__year=search_date.year).filter(start__month = search_date.month).filter(start__day = search_date.day)
+        schedules |= sc
+
+
+    for sc in schedules:
+        trainer_dict[str(sc.Trainer)]['hour_'+str(sc.start.hour)] = sc.title
+
+    trainer_dict = trainer_dict.items()
+
+    context = {
+        'all_schedules' : all_schedules,
+        'search_date' : search_date1 if search_date1 else datetime.date.today(),
+        'Fitness_list':Fitness_list,
+        'trainer_dict' : trainer_dict
+    }
+    return render(request, 'management/fitness_daily_schedule.html', context)
+
+def pilates_daily_schedule(request):
+    today = datetime.date.today()
+    Pilates_list = User.objects.filter(groups__name='Pilates') # Pilates 팀 직원들
+    schedules= Schedule.objects.none()
+    trainer_dict = OrderedDict()
+
+    for f in Pilates_list:
+        trainer_dict[str(f)] = {'name' : f, 'hour_21':'', 'hour_22':'', 'hour_23':'', 'hour_0':'', 'hour_1':'','hour_2':'','hour_3':'','hour_4':'','hour_5':'','hour_6':'','hour_7':'','hour_8':'','hour_9':'','hour_10':'','hour_11':'','hour_12':'','hour_13':'','hour_14':'',}
+
+        sc = f.schedule.filter(start__year=today.year).filter(start__month = today.month).filter(start__day = today.day) #오늘
+        schedules |= sc
+
+    for sc in schedules:
+        trainer_dict[str(sc.Trainer)]['hour_'+str(sc.start.hour)] = sc.title
+
+    trainer_dict = trainer_dict.items()
+
+
+    context = {
+        'Pilates_list':Pilates_list,
+        'trainer_dict' : trainer_dict,
+        'search_date' : datetime.date.today()
+    }
+    return render(request, 'management/pilates_daily_schedule.html', context)
+
+def pilates_daily_schedule_search(request):
+
+    all_schedules = Schedule.objects.all()
+    Pilates_list = User.objects.filter(groups__name='Pilates') # Pilates 팀 직원들
+
+    search_date1 = request.GET.get('search_date','') #날짜 얻기
+    search_date= datetime.datetime.strptime(search_date1, '%Y-%m-%d')
+
+    schedules= Schedule.objects.none()
+    trainer_dict = OrderedDict()
+
+    for f in Pilates_list:
+        trainer_dict[str(f)] = {'name' : f, 'hour_21':'', 'hour_22':'', 'hour_23':'', 'hour_0':'', 'hour_1':'','hour_2':'','hour_3':'','hour_4':'','hour_5':'','hour_6':'','hour_7':'','hour_8':'','hour_9':'','hour_10':'','hour_11':'','hour_12':'','hour_13':'','hour_14':'',}
+
+        sc = f.schedule.filter(start__year=search_date.year).filter(start__month = search_date.month).filter(start__day = search_date.day)
+        schedules |= sc
+
+
+    for sc in schedules:
+        trainer_dict[str(sc.Trainer)]['hour_'+str(sc.start.hour)] = sc.title
+
+    trainer_dict = trainer_dict.items()
+
+    context = {
+        'all_schedules' : all_schedules,
+        'search_date' : search_date1 if search_date1 else datetime.date.today(),
+        'Pilates_list':Pilates_list,
+        'trainer_dict' : trainer_dict
+    }
+    return render(request, 'management/pilates_daily_schedule.html', context)

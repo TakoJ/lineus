@@ -35,4 +35,10 @@ urlpatterns = [
     url(r'^sales_search/$', views.sales_search, name='sales_search'),
     ##fitenss 스케줄
     url(r'^Fitness_schedule_management/$', views.Fitness_schedule_management, name='Fitness_schedule_management'),
+    #일일 근무 현황(피트니스)
+    url(r'^fitness_daily_schedule/$', views.fitness_daily_schedule, name='fitness_daily_schedule'),
+    url(r'^fitness_daily_schedule_search/$', views.fitness_daily_schedule_search, name='fitness_daily_schedule_search'),
+    #일일 근무 현황(필라테스)
+    url(r'^pilates_daily_schedule/$', views.pilates_daily_schedule, name='pilates_daily_schedule'),
+    url(r'^pilates_daily_schedule_search/$', views.pilates_daily_schedule_search, name='pilates_daily_schedule_search'),
 ]

@@ -153,13 +153,23 @@
             <input type="text" name="locker_amount" class="numberinput my-control" id="locker_amount" required> </td>
     </tr>
     <tr>
-        <th> 총결제금액*</th>
+        <th>총결제금액*</th>
         <td><input type="text" name="payment_amount" class="numberinput form-control" id="payment_amount" required></td>
     </tr>
     <tr>
-        <th>결제방식*</th>
+        <th>회원권 결제방식*</th>
         <td>
             <select name="payment_method" class="select form-control" id="payment_method">
+            <option value="카드">카드</option>
+            <option value="현금">현금</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th>락카 결제방식</th>
+        <td>
+            <select name="locker_payment_method" class="select form-control" id="locker_payment_method">
+            <option value="">---------</option>
             <option value="카드">카드</option>
             <option value="현금">현금</option>
             </select>

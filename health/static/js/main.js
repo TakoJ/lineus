@@ -46,7 +46,18 @@ $(function(){
 
     });
 
-    $('#locker_amount').keyup(function(event){
+    $('#H_locker_amount , #G_locker_amount').keyup(function(event){
+        H_locker_amount = $('#H_locker_amount').val();
+        G_locker_amount = $('#G_locker_amount').val();
+        $('#locker_amount').val(Number(H_locker_amount)+Number(G_locker_amount))
+
+        membership_amount = $('#membership_amount').val();
+        locker_amount = $('#locker_amount').val();
+        $('#payment_amount').val(Number(membership_amount)+Number(locker_amount));
+    });
+
+
+    $('#locker_amount, #membership_amount').keyup(function(event){
         membership_amount = $('#membership_amount').val();
         locker_amount = $('#locker_amount').val();
         $('#payment_amount').val(Number(membership_amount)+Number(locker_amount));
@@ -153,6 +164,5 @@ if($('div').is('.PT_Register')){
     });
 
 }
-
 
 });

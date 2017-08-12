@@ -10,11 +10,12 @@
 </form>
 </div>
 
-<table class="table table-striped col-sm-8 col-sm-offset-2" style="width:60%; margin-top:30px;">
+<table class="table table-striped text-center col-sm-8 col-sm-offset-2" style="width:60%; margin-top:30px;">
         <th>성명</th>
         <th>성별</th>
         <th>생년월일</th>
-        <th>PT 등록횟수</th>
+        <th>PT(피트니스) 등록세션</th>
+        <th>PT(필라테스) 등록세션</th>
         <th></th>
     </thead>
     <tbody>
@@ -24,6 +25,7 @@
         <td>{{ member.sex }}</td>
         <td>{{ member.birth }}</td>
         <td>{{ member.registered_session }}</td>
+        <td>{{ member.Pil_registered_session }}</td>
         {% if request.user|has_group:"Fitness" %}
             <td><a class="btn btn-default" href="{% url "PT_register_create" member.id %}">pt등록</a></td>
             {% elif request.user|has_group:"Pilates" %}

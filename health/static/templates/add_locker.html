@@ -1,0 +1,76 @@
+{% extends "navbar.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h2 class="text-center"><span class="header">락카 추가 폼</span></h2>
+
+<hr/>
+
+<div class="container">
+    <form action="" method="POST" class="form-ho">
+    {% csrf_token %}
+        <table class="table">
+        <tr>
+            <th>성명</th>
+            <td>{{member}}</td>
+        </tr>
+        <tr>
+            <th>생년월일</th>
+            <td>{{ member.birth }}</td>
+        </tr>
+        <tr>
+            <th>락카타입 선택</th>
+            <td>
+                <select name="locker_type" class="select my-control" id="locker_type">
+                <option value="">---------</option>
+                <option value="H">H</option>
+                <option value="G">G</option>
+                <option value="Both">둘다</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>헬스 락카</th>
+            <td>
+                <strong> 헬스락카 시작일</strong>
+                <input type="date" name="H_locker_start_date" class="H_locker_start_date dateinput my-control" value="{{today}}">
+                <strong> ~ 헬스락카 종료일</strong>
+                <input type="date" name="H_locker_end_date" class="H_locker_end_date dateinput my-control">
+            </td>
+        </tr>
+        <tr>
+            <th>골프 락카</th>
+            <td>
+                <strong> 골프락카 시작일</strong>
+                <input type="date" name="G_locker_start_date" class="G_locker_start_date dateinput my-control" value="{{today}}">
+                <strong> ~ 골프락카 종료일</strong>
+                <input type="date" name="G_locker_end_date" class="G_locker_end_date dateinput my-control">
+            </td>
+        </tr>
+        <tr>
+        <th>헬스락카 금액</th>
+        <td>
+            <input type="number" name="H_locker_amount" class="numberinput my-control">
+            <strong>골프락카 금액</strong>
+            <input type="number" name="G_locker_amount" class="numberinput my-control">
+            <strong> 락카 총 금액</strong>
+            <input type="text" name="locker_amount" class="numberinput my-control" id="locker_amount" >
+        </td>
+    </tr>
+        <tr>
+            <th>락카 결제방식</th>
+            <td>
+                <select name="locker_payment_method" class="select form-control" id="locker_payment_method">
+                <option value="">---------</option>
+                <option value="카드">카드</option>
+                <option value="현금">현금</option>
+                </select>
+            </td>
+        </tr>
+        </table>
+        <button type="submit" class="btn btn-success" style="float:right;margin:10px;" >락카 추가</button>
+    </form>
+
+</div>
+
+{% endblock %}

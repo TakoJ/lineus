@@ -1,0 +1,92 @@
+{% extends "navbar.html" %}
+{% block content %}
+
+<h2 class="text-center"><span class="header">필라테스팀 일일 근무 현황</span></h2>
+
+<hr/>
+<div class="container">
+
+    <div class="text-center">
+        <form action="{% url 'management:pilates_daily_schedule_search' %}" method="GET">
+            <span><input type="date" class="search_date my-control" name="search_date" value="{{ search_date }}" ></span>
+                    <a class="today btn btn-warning">오늘</a>
+            <button class="btn btn-info" value="검색" >검색</button>
+        </form>
+    </div>
+
+    <hr/>
+    <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th></th>
+            <th>06:00</th>
+            <th>07:00</th>
+            <th>08:00</th>
+            <th>09:00</th>
+            <th>10:00</th>
+            <th>11:00</th>
+            <th>12:00</th>
+            <th>13:00</th>
+            <th>14:00</th>
+            <th>15:00</th>
+            <th>16:00</th>
+            <th>17:00</th>
+            <th>18:00</th>
+            <th>19:00</th>
+            <th>20:00</th>
+            <th>21:00</th>
+            <th>22:00</th>
+            <th>23:00 </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trainer, training in trainer_dict %}
+        <tr>
+            <td>{{ trainer }}</td>
+            <td>{{ training.hour_21 }}</td>
+            <td>{{ training.hour_22 }}</td>
+            <td>{{ training.hour_23 }}</td>
+            <td>{{ training.hour_0 }}</td>
+            <td>{{ training.hour_1 }}</td>
+            <td>{{ training.hour_2 }}</td>
+            <td>{{ training.hour_3 }}</td>
+            <td>{{ training.hour_4 }}</td>
+            <td>{{ training.hour_5 }}</td>
+            <td>{{ training.hour_6 }}</td>
+            <td>{{ training.hour_7 }}</td>
+            <td>{{ training.hour_8 }}</td>
+            <td>{{ training.hour_9 }}</td>
+            <td>{{ training.hour_10 }}</td>
+            <td>{{ training.hour_11 }}</td>
+            <td>{{ training.hour_12 }}</td>
+            <td>{{ training.hour_13 }}</td>
+            <td>{{ training.hour_14 }}</td>
+
+        </tr>
+        {% endfor %}
+
+    </tbody>
+
+    </table>
+
+</div>
+
+<script type="text/javascript">
+    //날짜 버튼 처리
+    $('.today').click(function(){
+
+        $.ajax({
+            url: "{% url 'management:set_today' %}",
+            data: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+
+            success: function(response){
+                $('.search_date').val(response.search_date);
+            },
+            error: function(error){
+                alert("실패다");
+            }
+        });
+
+    });
+</script>
+{% endblock %}

@@ -59,7 +59,7 @@
             editable: true,
             firstDay: 1, //  1(Monday) this can be changed to 0(Sunday) for the USA system
             selectable: true,
-            defaultView: 'month',
+            defaultView: 'agendaWeek',
 
             axisFormat: 'h:mm',
             columnFormat: {
@@ -283,7 +283,7 @@
                     end: new Date({{schedule.get_year}},{{schedule.get_month}},{{schedule.get_day}},{{schedule.get_hour}}+10,{{schedule.get_minute}}),//1시간 단위이므로 end는 +10
 
                     allDay: false,
-                    className: 'success',
+                    className: 'info',
                     url: "{% url 'schedule_delete' schedule.id %}"
                     },
                 {% endfor %}
@@ -296,7 +296,7 @@
                     end: new Date({{OT_schedule.get_year}},{{OT_schedule.get_month}},{{OT_schedule.get_day}},{{OT_schedule.get_hour}}+10,{{schedule.get_minute}}),//1시간 단위이므로 end는 +10
 
                     allDay: false,
-                    className: 'info',
+                    className: 'success',
                     url: "{% url 'schedule_delete' OT_schedule.id %}"
                     },
                 {% endfor %}

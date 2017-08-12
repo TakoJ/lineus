@@ -1,5 +1,5 @@
 from django.contrib import admin
-from staff.models import Member, MembershipHistory, History, Pil_History, Schedule, PaymentHistory, RefundHistory
+from staff.models import Member, Locker, MembershipHistory, History, Pil_History, Schedule, PaymentHistory, RefundHistory
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.admin import UserAdmin
 from django import forms
@@ -21,6 +21,10 @@ class MemberAdmin(admin.ModelAdmin):
         HistoryInline,
         ScheduleInline,
     ]
+
+@admin.register(Locker)
+class LockerAdmin(admin.ModelAdmin):
+    list_display = ['id','user','locker_type','H_locker_start_date', 'H_locker_end_date', 'G_locker_start_date', 'G_locker_end_date', 'locker_amount','locker_payment_method']
 
 @admin.register(MembershipHistory)
 class MembershipHistoryAdmin(admin.ModelAdmin):

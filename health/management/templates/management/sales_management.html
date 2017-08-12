@@ -14,7 +14,7 @@
         <!-- class="datepicker해도 됨." -->
         <span><input type="date" class="startdate my-control" name="startdate" value="{{ startdate }}" ></span>
          ~ <span><input type="date" class="enddate my-control"  name="enddate"  value="{{ enddate }}" ></span>
-        <a id="today" class="btn btn-warning">오늘</a>
+        <a class="today btn btn-warning">오늘</a>
         <button type="submit" class="btn btn-info" value="검색" >검색</button>
     </form>
 
@@ -87,7 +87,7 @@
 
 <script type="text/javascript">
     //날짜 버튼 처리
-    $('#today').click(function(){
+    $('.today').click(function(){
 
         $.ajax({
             url: "{% url 'management:set_today' %}",

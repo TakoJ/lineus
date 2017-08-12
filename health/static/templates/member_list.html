@@ -33,6 +33,7 @@
                 <th><a class="order" href="?order_by=PT_status">PT(Fitness)</a></th>
                 <th><a class="order" href="?order_by=Pil_status">PT(Pilates)</a></th>
                 <th>등록 내역</th>
+                <th>락카 추가</th>
             </tr>
         </thead>
         <tbody>
@@ -50,6 +51,7 @@
                 <td>{{ m.PT_status }}</td>
                 <td>{{ m.Pil_status }}</td>
                 <td><a href="{%url "member_history" m.id %}">등록 내역</a></td>
+                <td><a href="{% url 'add_locker' m.id %}">락카 추가</a></td>
             </tr>
             {% endfor %}
         </tbody>
